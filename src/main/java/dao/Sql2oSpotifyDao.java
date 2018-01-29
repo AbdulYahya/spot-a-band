@@ -26,4 +26,14 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             System.out.println(ex);
         }
     }
+
+    @Override
+    public Artist findById(int id) {
+        String sql = "SELECT * FROM artists WHERE id = :id";
+        try (Connection con = sql2o.open()) {
+            return con.createQuery(sql)
+                    .addParameter("id", id)
+                    .executeAndFetchFirst(Artist.class);
+        }
+    }
 }

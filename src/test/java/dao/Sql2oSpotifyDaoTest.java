@@ -34,4 +34,13 @@ public class Sql2oSpotifyDaoTest {
         assertEquals(1, artist.getId());
     }
 
+    @Test
+    public void findById() throws Exception {
+        Artist artist = new Artist("ABC", "asdasdafawe2132");
+        Artist otherArtist = new Artist("DEF", "dadaaw132");
+        spotifyDao.add(artist);
+        spotifyDao.add(otherArtist);
+        assertEquals(2, spotifyDao.findById(2).getId());
+    }
+
 }
