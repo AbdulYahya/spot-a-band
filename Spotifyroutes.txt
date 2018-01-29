@@ -1,0 +1,17 @@
+auth URL: https://accounts.spotify.com/authorize
+token URL: https://accounts.spotify.com/api/token
+
+client id: 233f1b1faff04060b1c0d17897b65b58
+client secret: 289b7c80f70a4da99134890f0879e35f
+
+\\ =============== Routes =================== \\
+
+
+-------------------------
+To check top tracks:
+https://api.spotify.com/v1/me/top/tracks
+A scope was required for this route: user-top-read
+
+To check top artists:
+https://api.spotify.com/v1/me/top/artists
+-------------------------
