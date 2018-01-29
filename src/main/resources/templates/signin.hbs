@@ -1,0 +1,31 @@
+{{#partial "main"}}
+  <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
+    <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
+      <div class="my-3 py-3">
+        <h2 class="display-5">Please Sign in</h2>
+        <p class="font-weight-light">And an even wittier subheading.</p>
+      </div>
+      <div class="bg-light box-shadow mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;">
+        <div class="row">
+          <div class="col-2"></div>
+          <div class="mt-5 col-8">
+            <form>
+              <div class="form-group">
+                <input type="email" class="form-control" id="userEmail" name="userEmail" aria-describedby="emailHelp" placeholder="Enter email">
+                <small id="emailHelp"  class="form-text text-muted">We'll never share your email with anyone else.</small>
+              </div>
+              <div class="form-group">
+                <input type="password" class="form-control" id="userPassword" name="userPassword" placeholder="Password">
+              </div>
+              <p class="mt-4 text-muted font-weight-light">And an even wittier subheading to boot.</p>
+              <button type="submit" class="mt-1 btn btn-outline-secondary text-success">Submit</button>
+            </form>
+          </div>
+          <div class="col-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+{{/partial}}
+
+{{> layout.hbs}}
