@@ -47,7 +47,7 @@ public class App {
             Map<String, Object> model = new HashMap<>();
             boolean authenticated = true;
             /*
-            *  Check if user is Authenticated
+            *  Logic to check if user is Authenticated
             * */
             if (!authenticated) {
                 halt(401, new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs")));
