@@ -17,3 +17,24 @@ A scope was required for this route: user-top-read
 To check top artists:
 https://api.spotify.com/v1/me/top/artists
 -------------------------
+
+\\===============OTHER NOTES==============\\
+
+**Create Playlist of top X tracks by each member of an array of artists
+
+POST: Create Playlist [empty]
+https://developer.spotify.com/web-api/create-playlist/
+
+artistId -> [array of spotify ID's for each artist]
+LOOP: For Each artist in [artists]
+    search spotify API for artistName
+    https://developer.spotify.com/web-api/search-item/
+    [artistIDs].add(result)
+
+LOOP: For Each id in [artistIDs]
+    GET id's top tracks (returns [topTracks])
+        https://developer.spotify.com/web-api/get-artists-top-tracks/
+    LOOP: For Each track in [topTracks], up to X
+        trackID = GET track spotify ID
+        POST add trackID to playlist
+        https://developer.spotify.com/web-api/add-tracks-to-playlist/
