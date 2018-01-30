@@ -36,4 +36,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
                     .executeAndFetchFirst(Artist.class);
         }
     }
+
+//    @Override
+//    public Artist getTopArtistSpotify(){}
 }
