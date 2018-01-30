@@ -12,5 +12,6 @@ public interface SpotifyDao {
     //READ
     Artist findById(int id);
 
+    String getTopArtist();
 
 }
