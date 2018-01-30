@@ -108,7 +108,7 @@ public class App {
                     .get(0).getAsJsonObject();
 
 //            JsonObject response =
-            System.out.println(ticketMasterDao.getNextShow("Faye Carol").getLocalDate());
+            System.out.println(ticketMasterDao.getNextPortlandShow("Faye Carol").getLocalDate());
             System.out.println(spotifyDao.getTopArtist());
 
         } catch (IOException e) {
