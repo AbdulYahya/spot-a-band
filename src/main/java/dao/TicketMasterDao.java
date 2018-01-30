@@ -15,7 +15,7 @@ public interface TicketMasterDao {
     Event getNextShow(String artistName);
 
     //add event to db to easily track later "bookmark"
-    void addEvent(Event event, int userId);
+    void addEvent(Event event);
 
     //==============read
 
