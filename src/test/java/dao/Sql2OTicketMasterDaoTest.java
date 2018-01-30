@@ -41,7 +41,7 @@ public class Sql2OTicketMasterDaoTest {
 
     @Test
     public void getNextShow() throws Exception {
-        Event event = ticketMasterDao.getNextShow("weird al");
+        Event event = ticketMasterDao.getNextShow("weird a;git ");
         assertEquals("Weird Al Yankovic", event.getName());
     }
 
