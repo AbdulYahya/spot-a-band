@@ -41,14 +41,15 @@ public class App {
 
         //get top artist
         get("https://api.spotify.com/v1/me/top/artists", (request, response) -> {
-            Map<String, Object> model = new HashMap<>();
+                    Map<String, Object> model = new HashMap<>();
 
-            //big JSON goes here
-            //artists = json.queryParams("artists");
-            // a miracle occurs to turn artists into an array
-            //
+                    //big JSON goes here
+                    //artists = json.queryParams("artists");
+                    // a miracle occurs to turn artists into an array
+                    //
 
-            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+                    return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+        });
 
         get("/signin", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
