@@ -14,6 +14,8 @@ public interface TicketMasterDao {
     //get next show in town for an artist
     Event getNextShow(String artistName);
 
+    List<Event> getTonightsShows();
+
     //add event to db to easily track later "bookmark"
     void addEvent(Event event);
 

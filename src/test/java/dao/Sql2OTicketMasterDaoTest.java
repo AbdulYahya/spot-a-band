@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 
@@ -39,8 +41,17 @@ public class Sql2OTicketMasterDaoTest {
 
     @Test
     public void getNextShow() throws Exception {
-        Event event = ticketMasterDao.getNextShow("weird al");
+        Event event = ticketMasterDao.getNextShow("weird a;git ");
         assertEquals("Weird Al Yankovic", event.getName());
+    }
+
+    @Test
+    public void getTonightsShows() throws Exception {
+        List<Event> test = ticketMasterDao.getTonightsShows();
+        assertEquals(3, test.size());
+        assertEquals("Bruce Cockburn", test.get(0).getName());
+        assertEquals("Iration - Meet & Greet Packages", test.get(1).getName());
+        assertEquals("David Barber W/ Radio Phoenix", test .get(2).getName());
     }
 
     @Test

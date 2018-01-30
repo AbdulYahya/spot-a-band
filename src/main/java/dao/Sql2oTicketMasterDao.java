@@ -5,14 +5,12 @@ import models.*;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -27,12 +25,22 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         this.sql2o = sql2o;
     }
 
+    public String getTomorrow(){
+        String datePatternToUse = "yyyy/MM/dd";
+        SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
+        Calendar calendar = Calendar.getInstance();
+        Date today = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_YEAR, 2);
+        Date tomorrow = calendar.getTime();
+        return  sdf.format(tomorrow).replaceAll("/", "-");
+    }
+
 
     @Override
     public Event getNextShow(String artistName) {
-        //event to be returned
 
-        Event event = new Event("", "", "", "","");
+        //event to be returned
+        Event event = new Event(null, null, null, null, null);
 
         //API call url split into parameters:git
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
@@ -44,17 +52,22 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         //assembled url:
         String apiRequest = (route + classificationName + artist + marketId + apiKey).replaceAll(" ", "+");
 
-        //prep for http query
-        String charset = "UTF-8";
-
-        //connect to ticketmaster api
+        //sent request to ticketmaster api
         try {
-            JsonObject priceRange = new JsonObject();
             URL url = new URL(apiRequest);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
             request.connect();
             JsonParser parser = new JsonParser();
+
+            //get back json object
             JsonElement json = parser.parse(new InputStreamReader((InputStream) request.getContent()));
+
+            //check if there are any events
+            if (json.getAsJsonObject().getAsJsonObject("_embedded") == null) {
+                System.out.println("no events");
+                return event;
+            }
+
             //get most data from first object in "events" array in json response
             JsonObject apiResponse = json.getAsJsonObject()
                     .getAsJsonObject("_embedded")
@@ -76,10 +89,12 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                     .getAsJsonObject("start")
                     .getAsJsonPrimitive("localTime");
 
-            //this is getting null pointer exception
-//            if (json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject() != null) {
-//                priceRange = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject();
-//            }
+            //see if there is price range data and assign it if it exists
+            if (json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges") != null) {
+                JsonObject priceRange = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject();
+                event.setPriceRange("$" + priceRange.get("min").getAsString() + " to $" + priceRange.get("max").getAsString());
+                System.out.println(event.getPriceRange());
+            }
 
             //set event parameters
             event.setName(apiResponse.get("name").getAsString());
@@ -88,16 +103,72 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
             event.setLocalDate(date.get("localDate").getAsString());
             event.setLocalTime(time.toString());
 
-            //getting null pointer exception
-//            if (priceRange != null) {
-//                event.setPriceRange(priceRange.get("min").getAsString() + "to" + priceRange.get("max").getAsString());
-//            }
-
-
         }catch (IOException e) {
             e.printStackTrace();
         }
         return event;
+    }
+
+    @Override
+    public List<Event> getTonightsShows() {
+        //list of events to be returned
+        List<Event> tonightsShows = new ArrayList<>();
+
+
+        //build apiRequest url
+        //API call url split into parameters:git
+        String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
+        String classificationName = "&classificationName=music";
+        String endDateTime = String.format("&endDateTime=%s%s", getTomorrow(), "T00:00:00Z");
+        String marketId = "&dmaId=362";
+        String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
+
+        //assembled url:
+        String apiRequest = (route + classificationName + endDateTime + marketId + apiKey).replaceAll(" ", "+");
+        try {
+            URL url = new URL(apiRequest);
+            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            request.connect();
+            JsonParser parser = new JsonParser();
+            JsonElement json = parser.parse(new InputStreamReader((InputStream) request.getContent()));
+            //get array of tonight's events in json format
+            JsonArray eventsArray = json.getAsJsonObject()
+                    .getAsJsonObject("_embedded")
+                    .getAsJsonArray("events");
+
+            //loop through events array and add each event to list
+            for (int i = 0; i < eventsArray.size(); i++) {
+                Event event = new Event("", "", "", "", "");
+                JsonObject apiResponse = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(i)
+                        .getAsJsonObject();
+                JsonObject date = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(i).getAsJsonObject()
+                        .getAsJsonObject("dates")
+                        .getAsJsonObject("start");
+                JsonPrimitive time = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(i).getAsJsonObject()
+                        .getAsJsonObject("dates")
+                        .getAsJsonObject("start")
+                        .getAsJsonPrimitive("localTime");
+                event.setName(apiResponse.get("name").getAsString());
+                event.setTicketMasterId(apiResponse.get("id").getAsString());
+                event.setUrl(apiResponse.get("url").getAsString());
+                event.setLocalDate(date.get("localDate").getAsString());
+                event.setLocalTime(time.toString());
+                tonightsShows.add(event);
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return tonightsShows;
     }
 
     @Override
