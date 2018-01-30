@@ -24,7 +24,10 @@
         <a class="py-2 d-none d-md-inline-block" href="#">Route 2</a>
         <a class="py-2 mr-5 d-none d-md-inline-block" href="#">Route 3</a>
         <!-- Unless user is authenticated, show log in button -->
-        <a class="py-2 ml-5 d-none d-md-inline-block text-success" href="/">Log In</a>
+        {{#unless authenticated}}
+          <a class="py-2 ml-5 d-none d-md-inline-block text-success" href="/signin">Sign In</a>
+        {{/unless}}
+          <a class="py-2 ml-5 d-none d-md-inline-block text-success" href="/profile/{{ user }}">{{ user }}</a>
       </div>
     </nav>
   {{/block}}
