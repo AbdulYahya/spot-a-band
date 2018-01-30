@@ -30,8 +30,11 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
     @Override
     public Event getNextShow(String artistName) {
+        //event to be returned
+
         Event event = new Event("", "", "", "","");
-        //API call url split into parameters:
+
+        //API call url split into parameters:git
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
         String classificationName = "&classificationName=music";
         String artist = String.format("&keyword=%s", artistName);
@@ -52,9 +55,26 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
             request.connect();
             JsonParser parser = new JsonParser();
             JsonElement json = parser.parse(new InputStreamReader((InputStream) request.getContent()));
-            JsonObject apiResponse = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject();
-            JsonObject date = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonObject("dates").getAsJsonObject("start");
-            JsonPrimitive time = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonObject("dates").getAsJsonObject("start").getAsJsonPrimitive("localTime");
+            //get most data from first object in "events" array in json response
+            JsonObject apiResponse = json.getAsJsonObject()
+                    .getAsJsonObject("_embedded")
+                    .getAsJsonArray("events")
+                    .get(0)
+                    .getAsJsonObject();
+            //date and time are objects inside the events array and require reaching down further into Json data
+            JsonObject date = json.getAsJsonObject()
+                    .getAsJsonObject("_embedded")
+                    .getAsJsonArray("events")
+                    .get(0).getAsJsonObject()
+                    .getAsJsonObject("dates")
+                    .getAsJsonObject("start");
+            JsonPrimitive time = json.getAsJsonObject()
+                    .getAsJsonObject("_embedded")
+                    .getAsJsonArray("events")
+                    .get(0).getAsJsonObject()
+                    .getAsJsonObject("dates")
+                    .getAsJsonObject("start")
+                    .getAsJsonPrimitive("localTime");
 
             //this is getting null pointer exception
 //            if (json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject() != null) {
@@ -72,13 +92,6 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 //            if (priceRange != null) {
 //                event.setPriceRange(priceRange.get("min").getAsString() + "to" + priceRange.get("max").getAsString());
 //            }
-
-            System.out.println(event.getName());
-            System.out.println(event.getTicketMasterId());
-            System.out.println(event.getUrl());
-            System.out.println(event.getLocalDate());
-            System.out.println(event.getLocalTime());
-
 
 
         }catch (IOException e) {
