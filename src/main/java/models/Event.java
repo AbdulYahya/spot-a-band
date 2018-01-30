@@ -13,13 +13,12 @@ public class Event {
     private String priceRange;
 
 
-    public Event(String name, String ticketMasterId, String url, String localDate, String localTime, String priceRange) {
+    public Event(String name, String ticketMasterId, String url, String localDate, String localTime) {
         this.name = name;
         this.ticketMasterId = ticketMasterId;
         this.url = url;
         this.localDate = localDate;
         this.localTime = localTime;
-        this.priceRange = priceRange;
     }
 
     public int getId() {
@@ -85,24 +84,20 @@ public class Event {
 
         Event event = (Event) o;
 
-        if (id != event.id) return false;
         if (!name.equals(event.name)) return false;
         if (!ticketMasterId.equals(event.ticketMasterId)) return false;
         if (!url.equals(event.url)) return false;
-        if (!localDate.equals(event.localDate)) return false;
-        if (!localTime.equals(event.localTime)) return false;
-        return priceRange != null ? priceRange.equals(event.priceRange) : event.priceRange == null;
+        if (localDate != null ? !localDate.equals(event.localDate) : event.localDate != null) return false;
+        return localTime != null ? localTime.equals(event.localTime) : event.localTime == null;
     }
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + name.hashCode();
+        int result = name.hashCode();
         result = 31 * result + ticketMasterId.hashCode();
         result = 31 * result + url.hashCode();
-        result = 31 * result + localDate.hashCode();
-        result = 31 * result + localTime.hashCode();
-        result = 31 * result + (priceRange != null ? priceRange.hashCode() : 0);
+        result = 31 * result + (localDate != null ? localDate.hashCode() : 0);
+        result = 31 * result + (localTime != null ? localTime.hashCode() : 0);
         return result;
     }
 }

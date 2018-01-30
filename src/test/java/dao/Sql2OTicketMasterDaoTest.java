@@ -16,11 +16,11 @@ public class Sql2OTicketMasterDaoTest {
     private Sql2oTicketMasterDao ticketMasterDao;
 
     public Event setupEvent() {
-        return new Event("name","ticketMasterId", "url", "localDate", "localTime", "priceRange");
+        return new Event("name","ticketMasterId", "url", "localDate","localTime");
     }
 
     public Event setupEvent2() {
-        return new Event("name2","ticketMasterId2", "url2", "localDate2", "localTime2", "priceRange2");
+        return new Event("name2","ticketMasterId2", "url2", "localDate2","localTime");
     }
 
 
@@ -37,9 +37,11 @@ public class Sql2OTicketMasterDaoTest {
         con.close();
     }
 
-//    @Test
-//    public void getNextShow() throws Exception {
-//    }
+    @Test
+    public void getNextShow() throws Exception {
+        Event event = ticketMasterDao.getNextShow("weird al");
+        assertEquals("Weird Al Yankovic", event.getName());
+    }
 
     @Test
     public void addEvent_SetsUniqueIdToEvent_True() throws Exception {
@@ -62,16 +64,41 @@ public class Sql2OTicketMasterDaoTest {
 
     }
 
-//    @Test
-//    public void getAllEvents() throws Exception {
-//    }
-//
-//    @Test
-//    public void deleteById() throws Exception {
-//    }
-//
-//    @Test
-//    public void deleteAllEvents() throws Exception {
-//    }
+    @Test
+    public void getAllEvents() throws Exception {
+        Event testEvent = setupEvent();
+        Event testEvent2 = setupEvent2();
+        Event controlEvent = setupEvent();
+        controlEvent.setName("control");
+        ticketMasterDao.addEvent(testEvent);
+        ticketMasterDao.addEvent(testEvent2);
+        assertEquals(2, ticketMasterDao.getAllEvents(1).size());
+        assertFalse(ticketMasterDao.getAllEvents(1).contains(controlEvent));
+    }
 
+    @Test
+    public void deleteById() throws Exception {
+        Event testEvent = setupEvent();
+        Event controlEvent = setupEvent2();
+        ticketMasterDao.addEvent(testEvent);
+        int testId = testEvent.getId();
+        ticketMasterDao.addEvent(controlEvent);
+        int controlId = controlEvent.getId();
+        assertEquals(2, ticketMasterDao.getAllEvents(1).size());
+        ticketMasterDao.deleteById(testId);
+        assertEquals(1, ticketMasterDao.getAllEvents(1).size());
+        assertFalse(ticketMasterDao.getAllEvents(1).contains(testEvent));
+        assertTrue(ticketMasterDao.getAllEvents(1).contains(controlEvent));
+    }
+
+    @Test
+    public void deleteAllEvents() throws Exception {
+        Event testEvent =setupEvent();
+        Event secondEvent = setupEvent2();
+        ticketMasterDao.addEvent(testEvent);
+        ticketMasterDao.addEvent(secondEvent);
+        assertEquals(2, ticketMasterDao.getAllEvents(1).size());
+        ticketMasterDao.deleteAllEvents(1);
+        assertEquals(0, ticketMasterDao.getAllEvents(1).size());
+    }
 }
