@@ -135,6 +135,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
         //assembled url:
         String apiRequest = (route + classificationName + endDateTime + dmaId + apiKey).replaceAll(" ", "+");
+
         try {
             URL url = new URL(apiRequest);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -209,26 +210,22 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
 
             geoHash = GeoHash.encodeHash(lat, lng, 9);
-            System.out.println(lat);
-            System.out.println(lng);
-            System.out.println(geoHash);
 
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
-
         //API call to ticketmaster url split into parameters
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
         String classificationName = "&classificationName=music";
-        String endDateTime = String.format("&endDateTime=%s%s", date, "T00:00:00Z");
+        String endDateTime = String.format("&endDateTime=%s%s", date, "T23:59:59Z");
         String geoPoint = String.format("&geoPoint=%s", geoHash);
+        String radius = String.format("&radius=%s", "50");
         String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
 
         //assembled url:
-        String apiRequest = (route + classificationName + endDateTime + geoPoint + apiKey).replaceAll(" ", "+");
+        String apiRequest = (route + classificationName + endDateTime + geoPoint + radius + apiKey).replaceAll(" ", "+");
         try {
             URL url = new URL(apiRequest);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();

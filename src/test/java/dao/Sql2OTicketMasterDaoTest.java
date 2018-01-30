@@ -50,13 +50,16 @@ public class Sql2OTicketMasterDaoTest {
         List<Event> test = ticketMasterDao.getTonightsPortlandShows();
         assertEquals(3, test.size());
         assertEquals("Bruce Cockburn", test.get(0).getName());
-        assertEquals("David Barber W/ Radio Phoenix", test.get(1).getName());
-        assertEquals("Iration - Meet & Greet Packages", test .get(2).getName());
+        assertEquals("Iration - Meet & Greet Packages", test.get(1).getName());
+        assertEquals("David Barber W/ Radio Phoenix", test .get(2).getName());
     }
 
     @Test
     public void getShowsForCityOnDate() throws Exception {
-        List<Event> test = ticketMasterDao.getShowsForCityOnDay("portland", "2018-02-01");
+        List<Event> test = ticketMasterDao.getShowsForCityOnDay("portland", "2018-01-30");
+        assertEquals(2, test.size());
+        assertEquals("Iration - Meet & Greet Packages", test.get(0).getName());
+        assertEquals("David Barber W/ Radio Phoenix", test .get(1).getName());
     }
 
     @Test
