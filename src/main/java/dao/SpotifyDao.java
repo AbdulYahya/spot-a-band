@@ -8,4 +8,6 @@ public interface SpotifyDao {
     void add(Artist artist);
     Artist findById(int id);
 
+    String getTopArtist();
+
 }
