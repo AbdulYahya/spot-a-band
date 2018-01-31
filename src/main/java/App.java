@@ -72,7 +72,7 @@ public class App {
 //                model.put("user", user);
 //            }
             model.put("authorizeURL", authorizeURL);
-
+            model.put("user", request.session().attribute("user"));
 //            model.put("topArtistLink", spotifyDao.getTopArtist());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
@@ -196,6 +196,8 @@ public class App {
 
                 System.out.println("This account is a " + user.getProduct() + " account");
 
+                // Store user.id in a session
+                request.session().attribute("user", user.getId());
                 model.put("user", user.getId());
             } catch (Exception e) {
                 System.out.println("Something went wrong!" + e.getMessage());
