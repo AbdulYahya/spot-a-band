@@ -31,92 +31,117 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         String datePatternToUse = "yyyy/MM/dd";
         SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
         Calendar calendar = Calendar.getInstance();
-        Date today = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, 2);
         Date tomorrow = calendar.getTime();
         return  sdf.format(tomorrow).replaceAll("/", "-");
     }
 
-    public String getToday(){
+    public String getStartDate(String date){
         String datePatternToUse = "yyyy/MM/dd";
+        String[] dates = date.split("-");
+        int year = Integer.parseInt(dates[0]);
+        int month = Integer.parseInt(dates[1]) - 1;
+        int day = Integer.parseInt(dates[2]);
         SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
         Calendar calendar = Calendar.getInstance();
-        Date today = calendar.getTime();
-        return  sdf.format(today).replaceAll("/", "-");
+        calendar.set(year, month, day);
+        Date startDate = calendar.getTime();
+        return  sdf.format(startDate).replaceAll("/", "-");
+    }
+
+    public String getEndDate(String date){
+        String datePatternToUse = "yyyy/MM/dd";
+        String[] dates = date.split("-");
+        int year = Integer.parseInt(dates[0]);
+        int month = Integer.parseInt(dates[1]) - 1;
+        int day = Integer.parseInt(dates[2]);
+        SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, day);
+        calendar.add(Calendar.DAY_OF_YEAR, 2);
+        Date endDate = calendar.getTime();
+        return  sdf.format(endDate).replaceAll("/", "-");
     }
 
 
     @Override
-    public Event getNextPortlandShow(String artistName) {
+    public List<Event> getNextPortlandShow(List<String> artists) {
 
-        //event to be returned
-        Event event = new Event(null, null, null, null, null);
+        //event list to be returned
+        List<Event> nextPortlandShow = new ArrayList<>();
 
-        //API call url split into parameters:git
-        String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
-        String classificationName = "&classificationName=music";
-        String artist = String.format("&keyword=%s", artistName);
-        String dmaId = "&dmaId=362";
-        String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
+        for (String artistName : artists) {
 
-        //assembled url:
-        String apiRequest = (route + classificationName + artist + dmaId + apiKey).replaceAll(" ", "+");
+            //API call url split into parameters
+            String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
+            String classificationName = "&classificationName=music";
+            String artist = String.format("&keyword=%s", artistName);
+            String dmaId = "&dmaId=362";
+            String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
 
-        //sent request to ticketmaster api
-        try {
-            URL url = new URL(apiRequest);
-            HttpURLConnection request = (HttpURLConnection) url.openConnection();
-            request.connect();
-            JsonParser parser = new JsonParser();
+            //assembled url:
+            String apiRequest = (route + classificationName + artist + dmaId + apiKey).replaceAll(" ", "+");
+            //sent request to ticketmaster api
+            try {
+                URL url = new URL(apiRequest);
+                HttpURLConnection request = (HttpURLConnection) url.openConnection();
+                request.connect();
+                JsonParser parser = new JsonParser();
 
-            //get back json object
-            JsonElement json = parser.parse(new InputStreamReader((InputStream) request.getContent()));
+                //get back json object
+                JsonElement json = parser.parse(new InputStreamReader((InputStream) request.getContent()));
 
-            //check if there are any events
-            if (json.getAsJsonObject().getAsJsonObject("_embedded") == null) {
-                System.out.println("no events");
-                return event;
+                //check if there are any events
+                if (json.getAsJsonObject().getAsJsonObject("_embedded") != null) {
+
+                    //get most data from first object in "events" array in json response
+                    JsonObject apiResponse = json.getAsJsonObject()
+                            .getAsJsonObject("_embedded")
+                            .getAsJsonArray("events")
+                            .get(0)
+                            .getAsJsonObject();
+                    //date and time are objects inside the events array and require reaching down further into Json data
+                    JsonObject date = json.getAsJsonObject()
+                            .getAsJsonObject("_embedded")
+                            .getAsJsonArray("events")
+                            .get(0).getAsJsonObject()
+                            .getAsJsonObject("dates")
+                            .getAsJsonObject("start");
+                    JsonPrimitive time = json.getAsJsonObject()
+                            .getAsJsonObject("_embedded")
+                            .getAsJsonArray("events")
+                            .get(0).getAsJsonObject()
+                            .getAsJsonObject("dates")
+                            .getAsJsonObject("start")
+                            .getAsJsonPrimitive("localTime");
+
+                    //see if there is price range data and assign it if it exists
+                    String price= new String();
+                    if (json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges") != null) {
+                        JsonObject priceRange = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject();
+                        price = ("$" + priceRange.get("min").getAsString() + " to $" + priceRange.get("max").getAsString());
+                    } else {
+                        price = "no ticket price data";
+                    }
+
+                    //set event parameters
+                    String name = (apiResponse.get("name").getAsString());
+                    String ticketMasterId = (apiResponse.get("id").getAsString());
+                    String ticketMasterUrl = (apiResponse.get("url").getAsString());
+                    String localDate = (date.get("localDate").getAsString());
+                    String localTime = (time.toString());
+                    Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime);
+                    nextPortlandShow.add(event);
+                } else {
+                    Event event = new Event(artistName, "no upcoming shows", "no upcoming shows", "no upcoming shows", "no upcoming shows");
+                    nextPortlandShow.add(event);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-            //get most data from first object in "events" array in json response
-            JsonObject apiResponse = json.getAsJsonObject()
-                    .getAsJsonObject("_embedded")
-                    .getAsJsonArray("events")
-                    .get(0)
-                    .getAsJsonObject();
-            //date and time are objects inside the events array and require reaching down further into Json data
-            JsonObject date = json.getAsJsonObject()
-                    .getAsJsonObject("_embedded")
-                    .getAsJsonArray("events")
-                    .get(0).getAsJsonObject()
-                    .getAsJsonObject("dates")
-                    .getAsJsonObject("start");
-            JsonPrimitive time = json.getAsJsonObject()
-                    .getAsJsonObject("_embedded")
-                    .getAsJsonArray("events")
-                    .get(0).getAsJsonObject()
-                    .getAsJsonObject("dates")
-                    .getAsJsonObject("start")
-                    .getAsJsonPrimitive("localTime");
-
-            //see if there is price range data and assign it if it exists
-            if (json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges") != null) {
-                JsonObject priceRange = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject();
-                event.setPriceRange("$" + priceRange.get("min").getAsString() + " to $" + priceRange.get("max").getAsString());
-                System.out.println(event.getPriceRange());
-            }
-
-            //set event parameters
-            event.setName(apiResponse.get("name").getAsString());
-            event.setTicketMasterId(apiResponse.get("id").getAsString());
-            event.setUrl(apiResponse.get("url").getAsString());
-            event.setLocalDate(date.get("localDate").getAsString());
-            event.setLocalTime(time.toString());
-
-        }catch (IOException e) {
-            e.printStackTrace();
         }
-        return event;
+        return nextPortlandShow;
     }
 
     @Override
@@ -219,13 +244,17 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         //API call to ticketmaster url split into parameters
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
         String classificationName = "&classificationName=music";
-        String endDateTime = String.format("&endDateTime=%s%s", date, "T23:59:59Z");
+        String startDateTime = String.format("&startDateTime=%s%s", getStartDate(date), "T23:59:59Z");
+        String endDateTime = String.format("&endDateTime=%s%s", getEndDate(date), "T00:00:00Z");
         String geoPoint = String.format("&geoPoint=%s", geoHash);
         String radius = String.format("&radius=%s", "25");
         String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
 
         //assembled url:
-        String apiRequest = (route + classificationName + endDateTime + geoPoint + radius + apiKey).replaceAll(" ", "+");
+        String apiRequest = (route + classificationName + startDateTime + endDateTime + geoPoint + radius + apiKey).replaceAll(" ", "+");
+
+        System.out.println(apiRequest);
+
         try {
             URL url = new URL(apiRequest);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();

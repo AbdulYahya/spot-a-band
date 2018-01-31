@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -41,25 +42,39 @@ public class Sql2OTicketMasterDaoTest {
 
     @Test
     public void getNextPortlandShow() throws Exception {
-        Event event = ticketMasterDao.getNextPortlandShow("weird al");
-        assertEquals("Weird Al Yankovic", event.getName());
+        List<String> artists = new ArrayList<>();
+        artists.add("weird al");
+        artists.add("faye carol");
+        artists.add("eagles");
+        artists.add("muse");
+        List<Event> nextShows = ticketMasterDao.getNextPortlandShow(artists);
+        assertEquals("Weird Al Yankovic", nextShows.get(0).getName());
+        assertEquals("2018-05-25", nextShows.get(0).getLocalDate());
+        assertEquals("Faye Carol", nextShows.get(1).getName());
+        assertEquals("2018-02-17", nextShows.get(1).getLocalDate());
+        assertEquals("Eagles", nextShows.get(2).getName());
+        assertEquals("2018-05-05", nextShows.get(2).getLocalDate());
+        assertEquals("muse", nextShows.get(3).getName());
+        assertEquals("no upcoming shows", nextShows.get(3).getLocalDate());
     }
 
     @Test
     public void getTonightsPortlandShows() throws Exception {
         List<Event> test = ticketMasterDao.getTonightsPortlandShows();
         assertEquals(3, test.size());
-        assertEquals("Bruce Cockburn", test.get(0).getName());
-        assertEquals("Iration - Meet & Greet Packages", test.get(1).getName());
-        assertEquals("David Barber W/ Radio Phoenix", test .get(2).getName());
+        assertEquals("Dizzy Wright w/ Joyner Lucas", test.get(0).getName());
+        assertEquals("Bruce Cockburn", test.get(1).getName());
+        assertEquals("Rebecca Kilgore", test .get(2).getName());
     }
 
     @Test
-    public void getShowsForCityOnDate() throws Exception {
-        List<Event> test = ticketMasterDao.getShowsForCityOnDay("portland", "2018-01-30");
-        assertEquals(2, test.size());
-        assertEquals("Iration - Meet & Greet Packages", test.get(0).getName());
-        assertEquals("David Barber W/ Radio Phoenix", test .get(1).getName());
+    public void getShowsForCityOnDay() throws Exception {
+        List<Event> test = ticketMasterDao.getShowsForCityOnDay("portland", "2018-3-25");
+        assertEquals(4, test.size());
+        assertEquals("Lindi Ortega", test.get(0).getName());
+        assertEquals("Milk & Bone", test.get(1).getName());
+        assertEquals("Orchestral Manoeuvers in the Dark", test.get(2).getName());
+        assertEquals("Hamilton", test.get(3).getName());
     }
 
     @Test
