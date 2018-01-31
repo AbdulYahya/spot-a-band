@@ -38,6 +38,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
     public String getStartDate(String date){
         String datePatternToUse = "yyyy/MM/dd";
+        date.replaceAll("/", "-");
         String[] dates = date.split("-");
         int year = Integer.parseInt(dates[0]);
         int month = Integer.parseInt(dates[1]) - 1;
@@ -114,6 +115,13 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                             .getAsJsonObject("dates")
                             .getAsJsonObject("start")
                             .getAsJsonPrimitive("localTime");
+                    JsonObject jsonvenue = json.getAsJsonObject()
+                            .getAsJsonObject("_embedded")
+                            .getAsJsonArray("events")
+                            .get(0).getAsJsonObject()
+                            .getAsJsonObject("_embedded")
+                            .getAsJsonArray("venues")
+                            .get(0).getAsJsonObject();
 
                     //see if there is price range data and assign it if it exists
                     String price= new String();
@@ -123,17 +131,25 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                     } else {
                         price = "no ticket price data";
                     }
+                    String venueUrl = new String();
+                    if (jsonvenue.get("url") != null) {
+                        venueUrl = jsonvenue.get("url").getAsString();
+                    } else {
+                        venueUrl = "no venue link available";
+                    }
 
                     //set event parameters
-                    String name = (apiResponse.get("name").getAsString());
-                    String ticketMasterId = (apiResponse.get("id").getAsString());
-                    String ticketMasterUrl = (apiResponse.get("url").getAsString());
-                    String localDate = (date.get("localDate").getAsString());
-                    String localTime = (time.toString());
-                    Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime);
+                    String name = apiResponse.get("name").getAsString();
+                    String ticketMasterId = apiResponse.get("id").getAsString();
+                    String ticketMasterUrl = apiResponse.get("url").getAsString();
+                    String localDate = date.get("localDate").getAsString();
+                    String localTime = time.toString();
+                    String venue = jsonvenue.get("name").getAsString();
+                    Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime, venue, venueUrl);
                     nextPortlandShow.add(event);
+                    event.setPriceRange(price);
                 } else {
-                    Event event = new Event(artistName, "no upcoming shows", "no upcoming shows", "no upcoming shows", "no upcoming shows");
+                    Event event = new Event(artistName, "none", "", "no upcoming shows", "", "", "");
                     nextPortlandShow.add(event);
                 }
             } catch (IOException e) {
@@ -174,13 +190,12 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
             //loop through events array and add each event to list
             for (int i = 0; i < eventsArray.size(); i++) {
-                Event event = new Event("", "", "", "", "");
                 JsonObject apiResponse = json.getAsJsonObject()
                         .getAsJsonObject("_embedded")
                         .getAsJsonArray("events")
                         .get(i)
                         .getAsJsonObject();
-                JsonObject eventDate = json.getAsJsonObject()
+                JsonObject date = json.getAsJsonObject()
                         .getAsJsonObject("_embedded")
                         .getAsJsonArray("events")
                         .get(i).getAsJsonObject()
@@ -193,11 +208,38 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                         .getAsJsonObject("dates")
                         .getAsJsonObject("start")
                         .getAsJsonPrimitive("localTime");
-                event.setName(apiResponse.get("name").getAsString());
-                event.setTicketMasterId(apiResponse.get("id").getAsString());
-                event.setUrl(apiResponse.get("url").getAsString());
-                event.setLocalDate(eventDate.get("localDate").getAsString());
-                event.setLocalTime(time.toString());
+                JsonObject jsonvenue = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(0).getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("venues")
+                        .get(0).getAsJsonObject();
+
+                //see if there is price range data and assign it if it exists
+                String price= new String();
+                if (json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges") != null) {
+                    JsonObject priceRange = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject();
+                    price = ("$" + priceRange.get("min").getAsString() + " to $" + priceRange.get("max").getAsString());
+                } else {
+                    price = "no ticket price data";
+                }
+                String venueUrl = new String();
+                if (jsonvenue.get("url") != null) {
+                    venueUrl = jsonvenue.get("url").getAsString();
+                } else {
+                    venueUrl = "no venue link available";
+                }
+
+                //set event parameters
+                String name = apiResponse.get("name").getAsString();
+                String ticketMasterId = apiResponse.get("id").getAsString();
+                String ticketMasterUrl = apiResponse.get("url").getAsString();
+                String localDate = date.get("localDate").getAsString();
+                String localTime = time.toString();
+                String venue = jsonvenue.get("name").getAsString();
+                Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime, venue, venueUrl);
+                event.setPriceRange(price);
                 tonightsShows.add(event);
             }
         }catch (IOException e) {
@@ -268,7 +310,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
             //loop through events array and add each event to list
             for (int i = 0; i < eventsArray.size(); i++) {
-                Event event = new Event("", "", "", "", "");
+                Event event = new Event("", "", "", "", "", "", "");
                 JsonObject apiResponse = json.getAsJsonObject()
                         .getAsJsonObject("_embedded")
                         .getAsJsonArray("events")
@@ -304,7 +346,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
     @Override
     public void addEvent(Event event) {
-        String sql = "INSERT INTO events (name, ticketMasterId, url, localDate, localTime, priceRange) VALUES (:name, :ticketMasterId, :url, :localDate, :localTime, :priceRange)";
+        String sql = "INSERT INTO events (name, ticketMasterId, url, localDate, localTime, priceRange, venue, venueUrl) VALUES (:name, :ticketMasterId, :url, :localDate, :localTime, :priceRange, :venue, :venueUrl)";
         try (Connection con = sql2o.open()){
             int id = (int) con.createQuery(sql)
                     .bind(event)

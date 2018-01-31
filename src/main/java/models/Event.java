@@ -11,14 +11,18 @@ public class Event {
     private String localDate;
     private String localTime;
     private String priceRange;
+    private String venue;
+    private String venueUrl;
 
 
-    public Event(String name, String ticketMasterId, String url, String localDate, String localTime) {
+    public Event(String name, String ticketMasterId, String url, String localDate, String localTime, String venue, String venueUrl) {
         this.name = name;
         this.ticketMasterId = ticketMasterId;
         this.url = url;
         this.localDate = localDate;
         this.localTime = localTime;
+        this.venue = venue;
+        this.venueUrl = venueUrl;
     }
 
     public int getId() {
@@ -77,6 +81,22 @@ public class Event {
         this.priceRange = priceRange;
     }
 
+    public String getVenue() {
+        return venue;
+    }
+
+    public void setVenue(String venue) {
+        this.venue = venue;
+    }
+
+    public String getVenueUrl() {
+        return venueUrl;
+    }
+
+    public void setVenueUrl(String venueUrl) {
+        this.venueUrl = venueUrl;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -88,7 +108,9 @@ public class Event {
         if (!ticketMasterId.equals(event.ticketMasterId)) return false;
         if (!url.equals(event.url)) return false;
         if (localDate != null ? !localDate.equals(event.localDate) : event.localDate != null) return false;
-        return localTime != null ? localTime.equals(event.localTime) : event.localTime == null;
+        if (!localTime.equals(event.localTime)) return false;
+        if (venue != null ? !venue.equals(event.venue) : event.venue != null) return false;
+        return venueUrl != null ? venueUrl.equals(event.venueUrl) : event.venueUrl == null;
     }
 
     @Override
@@ -97,7 +119,9 @@ public class Event {
         result = 31 * result + ticketMasterId.hashCode();
         result = 31 * result + url.hashCode();
         result = 31 * result + (localDate != null ? localDate.hashCode() : 0);
-        result = 31 * result + (localTime != null ? localTime.hashCode() : 0);
+        result = 31 * result + localTime.hashCode();
+        result = 31 * result + (venue != null ? venue.hashCode() : 0);
+        result = 31 * result + (venueUrl != null ? venueUrl.hashCode() : 0);
         return result;
     }
 }
