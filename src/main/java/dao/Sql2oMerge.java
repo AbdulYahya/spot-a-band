@@ -1,7 +1,12 @@
 package dao;
 
-/**
- * Created by Guest on 1/31/18.
- */
-public class Sql2oMerge {
+import models.Event;
+
+import java.util.List;
+
+public class Sql2oMerge implements Merge{
+    @Override
+    public void eventsPlaylist(List<Event> events){
+
+    }
 }

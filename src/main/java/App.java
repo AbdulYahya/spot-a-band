@@ -55,12 +55,10 @@ public class App {
         final List<String> scopes = Arrays.asList("user-top-read, user-read-private, user-read-email");
         final String state = RandomStringUtils.random(34, true, true);
 
-
         // Root - Index
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
             String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
-
             /*
             *   Below auth/user vars are used for testing header-nav only
 //            * */
@@ -73,6 +71,7 @@ public class App {
 //            }
             model.put("authorizeURL", authorizeURL);
             model.put("user", request.session().attribute("user"));
+            model.put("email", request.session().attribute("email"));
 //            model.put("topArtistLink", spotifyDao.getTopArtist());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
@@ -198,7 +197,9 @@ public class App {
 
                 // Store user.id in a session
                 request.session().attribute("user", user.getId());
+                request.session().attribute("email", user.getEmail());
                 model.put("user", user.getId());
+                model.put("email", user.getEmail());
             } catch (Exception e) {
                 System.out.println("Something went wrong!" + e.getMessage());
             }
