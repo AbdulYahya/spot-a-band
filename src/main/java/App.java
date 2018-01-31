@@ -56,16 +56,7 @@ public class App {
 
             String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
 
-            /*
-            *   Below auth/user vars are used for testing header-nav only
-//            * */
-//            boolean authenticated = false;
-////            String user = "Abdul";
-//
-//            if (authenticated) {
-//                model.put("authenticated", authenticated);
-//                model.put("user", user);
-//            }
+
             model.put("authorizeURL", authorizeURL);
             model.put("user", request.session().attribute("user"));
             model.put("email", request.session().attribute("email"));
@@ -74,25 +65,13 @@ public class App {
         });
 
         //get top artist
-        get("https://api.spotify.com/v1/me/top/artists", (request, response) -> {
-                    Map<String, Object> model = new HashMap<>();
+//        get("https://api.spotify.com/v1/me/top/artists", (request, response) -> {
+//                    Map<String, Object> model = new HashMap<>();
+//
+//                    return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+//        });
 
-                    //big JSON goes here
-                    //artists = json.queryParams("artists");
-                    // a miracle occurs to turn artists into an array
-                    //
 
-                    return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
-        });
-
-        get("/signin", (request, response) -> {
-            Map<String, Object> model = new HashMap<>();
-            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
-
-            model.put("authorizeURL", authorizeURL);
-
-            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs"));
-        });
 
         get("/profile/:user", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
@@ -102,49 +81,6 @@ public class App {
             model.put("user", user);
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "profile.hbs"));
         });
-
-        /*
-        *   Spotify's /api/token authorization reroute
-        * */
-//        get("/auth", (request, response) -> {
-//            Map<String, Object> model = new HashMap<>();
-//            final String code = request.queryParams("code");
-//
-//
-//            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
-//            try {
-//                URL authURL = new URL(authorizeURL);
-//                HttpURLConnection connection = (HttpURLConnection) authURL.openConnection();
-//
-//                connection.setRequestMethod("GET");
-//                connection.setRequestProperty("code", code);
-//
-//                int responseCode = connection.getResponseCode();
-//
-//                if (responseCode == HttpURLConnection.HTTP_OK) { // success
-//                    BufferedReader in = new BufferedReader(new InputStreamReader(
-//                            connection.getInputStream()));
-//                    String inputLine;
-//                    StringBuffer res = new StringBuffer();
-//
-//                    while ((inputLine = in.readLine()) != null) {
-//                        res.append(inputLine + "\n");
-//                    }
-//                    in.close();
-//
-//                    // print result
-//                    System.out.println(res.toString());
-//                } else {
-//                    System.out.println("GET request not worked");
-//                }
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//
-//            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
-//        });
 
 
         get("/auth", (request, response) -> {
@@ -169,62 +105,6 @@ public class App {
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
 
-        // FILTERS
-//        before((request, response) -> {
-//            Map<String, Object> model = new HashMap<>();
-//            boolean authenticated = false;
-//            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
-//           // System.out.println(authorizeURL);
-//            model.put("authorizeURL", authorizeURL);
-//
-
-            /*
-            *  Logic to check if user is Authenticated
-            * */
-//
-//            final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = spotifyApi.authorizationCodeGrant(spotifyDao.getCode()).build().getAsync();
-//
-//        /* Add callbacks to handle success and failure */
-//            Futures.addCallback(authorizationCodeCredentialsFuture, new FutureCallback<AuthorizationCodeCredentials>() {
-//                @Override
-//                public void onSuccess(AuthorizationCodeCredentials authorizationCodeCredentials) {
-//    /* The tokens were retrieved successfully! */
-//                    System.out.println("Successfully retrieved an access token! " + authorizationCodeCredentials.getAccessToken());
-//                    System.out.println("The access token expires in " + authorizationCodeCredentials.getExpiresIn() + " seconds");
-//                    System.out.println("Luckily, I can refresh it using this refresh token! " +     authorizationCodeCredentials.getRefreshToken());
-//
-//    /* Set the access token and refresh token so that they are used whenever needed */
-//                    spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
-//                    spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
-//                }
-//
-//                @Override
-//                public void onFailure(Throwable throwable) {
-//    /* Let's say that the client id is invalid, or the code has been used more than once,
-//     * the request will fail. Why it fails is written in the throwable's message. */
-//
-//                }
-//            });
-
-//            if (!authenticated) {
-//                halt(401, new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs")));
-//            }
-//        });
-
-        /*
-        *   Testing Purposes
-        * */
-
-
-        // Define scopes
-
-
-
-
-        //System.out.println(authorizeURL);
-//        System.out.println(spotifyApi.);
-//        System.out.println(ticketMasterDao.getNextPortlandShow("Faye Carol").getLocalDate());
-
 
         // EXCEPTIONS FILTER
         exception(ApiException.class, (exc, req, res) -> {
@@ -236,9 +116,5 @@ public class App {
             res.body(gson.toJson(jsonMap));
         });
 
-        // AFTER FILTER
-//        after((request, response) -> {
-//           response.type("application/json");
-//        });
     }
 }
