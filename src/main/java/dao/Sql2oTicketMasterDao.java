@@ -31,22 +31,36 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         String datePatternToUse = "yyyy/MM/dd";
         SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
         Calendar calendar = Calendar.getInstance();
-        Date today = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, 2);
         Date tomorrow = calendar.getTime();
         return  sdf.format(tomorrow).replaceAll("/", "-");
     }
 
-    public String getStartDate(){
+    public String getStartDate(String date){
         String datePatternToUse = "yyyy/MM/dd";
+        String[] dates = date.split("-");
+        int year = Integer.parseInt(dates[0]);
+        int month = Integer.parseInt(dates[1]) - 1;
+        int day = Integer.parseInt(dates[2]);
         SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
         Calendar calendar = Calendar.getInstance();
-        Date today = calendar.getTime();
-        return  sdf.format(today).replaceAll("/", "-");
+        calendar.set(year, month, day);
+        Date startDate = calendar.getTime();
+        return  sdf.format(startDate).replaceAll("/", "-");
     }
 
-    public String getEndDate(){
-        return "";
+    public String getEndDate(String date){
+        String datePatternToUse = "yyyy/MM/dd";
+        String[] dates = date.split("-");
+        int year = Integer.parseInt(dates[0]);
+        int month = Integer.parseInt(dates[1]) - 1;
+        int day = Integer.parseInt(dates[2]);
+        SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, day);
+        calendar.add(Calendar.DAY_OF_YEAR, 2);
+        Date endDate = calendar.getTime();
+        return  sdf.format(endDate).replaceAll("/", "-");
     }
 
 
@@ -230,13 +244,14 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         //API call to ticketmaster url split into parameters
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
         String classificationName = "&classificationName=music";
-        String endDateTime = String.format("&endDateTime=%s%s", date, "T23:59:59Z");
+        String startDateTime = String.format("&startDateTime=%s%s", getStartDate(date), "T00:00:00Z");
+        String endDateTime = String.format("&endDateTime=%s%s", getEndDate(date), "T00:00:00Z");
         String geoPoint = String.format("&geoPoint=%s", geoHash);
         String radius = String.format("&radius=%s", "25");
         String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
 
         //assembled url:
-        String apiRequest = (route + classificationName + endDateTime + geoPoint + radius + apiKey).replaceAll(" ", "+");
+        String apiRequest = (route + classificationName + startDateTime + endDateTime + geoPoint + radius + apiKey).replaceAll(" ", "+");
 
         System.out.println(apiRequest);
 
