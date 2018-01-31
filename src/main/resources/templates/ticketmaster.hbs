@@ -1,0 +1,26 @@
+{{#partial "ticketmaster"}}
+    <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
+        <div class="my-3 py-3">
+            <h2 class="display-5">Section for finding a show based on Spotify user's top artists. </h2>
+            <p class="lead">subheading.</p>
+            <button>Show me the next show!</button>
+            {{#if eventList}}
+            {{#each eventList}}
+
+                    <li>{{name}}</li>
+                    <ul>
+                        <li>{{localDate}} at {{localTime}}</li>
+                        <li>{{venue}}: {{venueUrl}}</li>
+                        <li>{{priceRange}}</li>
+                        <li>buy tickets: {{url}}</li>
+                    </ul>
+            {{/each}}
+            </ul>
+            {{/if}}
+        </div>
+    </div>
+
+{{/partial}}
+
+{{> layout.hbs}}
+{{> index.hbs}}
