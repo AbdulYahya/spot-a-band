@@ -1,21 +1,33 @@
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import com.wrapper.spotify.Api;
+import com.wrapper.spotify.methods.CurrentUserRequest;
+import com.wrapper.spotify.models.AuthorizationCodeCredentials;
+import com.wrapper.spotify.models.Image;
 import dao.Sql2oSpotifyDao;
 import dao.Sql2oTicketMasterDao;
+import exceptions.ApiException;
+import models.User;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import spark.ModelAndView;
 import spark.template.handlebars.HandlebarsTemplateEngine;
+import org.apache.commons.lang3.RandomStringUtils;
 
+import javax.jws.Oneway;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static spark.Spark.*;
@@ -34,20 +46,34 @@ public class App {
         Sql2oTicketMasterDao ticketMasterDao = new Sql2oTicketMasterDao(sql2o);
         Sql2oSpotifyDao spotifyDao = new Sql2oSpotifyDao(sql2o);
 
+        Api spotifyApi = Api.builder()
+                .clientId("233f1b1faff04060b1c0d17897b65b58")
+                .clientSecret("289b7c80f70a4da99134890f0879e35f")
+                .redirectURI("http://localhost:4567/auth")
+                .build();
+
+        final List<String> scopes = Arrays.asList("user-top-read, user-read-private, user-read-email");
+        final String state = RandomStringUtils.random(34, true, true);
+
+
         // Root - Index
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
+            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+
             /*
             *   Below auth/user vars are used for testing header-nav only
-            * */
-            boolean authenticated = true;
-            String user = "Abdul";
+//            * */
+//            boolean authenticated = false;
+////            String user = "Abdul";
+//
+//            if (authenticated) {
+//                model.put("authenticated", authenticated);
+//                model.put("user", user);
+//            }
+            model.put("authorizeURL", authorizeURL);
 
-            if (authenticated) {
-                model.put("authenticated", authenticated);
-                model.put("user", user);
-            }
-
+//            model.put("topArtistLink", spotifyDao.getTopArtist());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
 
@@ -65,6 +91,10 @@ public class App {
 
         get("/signin", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
+            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+
+            model.put("authorizeURL", authorizeURL);
+
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs"));
         });
 
@@ -77,42 +107,172 @@ public class App {
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "profile.hbs"));
         });
 
-        // FILTERS
-        before((request, response) -> {
+        /*
+        *   Spotify's /api/token authorization reroute
+        * */
+//        get("/auth", (request, response) -> {
+//            Map<String, Object> model = new HashMap<>();
+//            final String code = request.queryParams("code");
+//
+//
+//            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+//            try {
+//                URL authURL = new URL(authorizeURL);
+//                HttpURLConnection connection = (HttpURLConnection) authURL.openConnection();
+//
+//                connection.setRequestMethod("GET");
+//                connection.setRequestProperty("code", code);
+//
+//                int responseCode = connection.getResponseCode();
+//
+//                if (responseCode == HttpURLConnection.HTTP_OK) { // success
+//                    BufferedReader in = new BufferedReader(new InputStreamReader(
+//                            connection.getInputStream()));
+//                    String inputLine;
+//                    StringBuffer res = new StringBuffer();
+//
+//                    while ((inputLine = in.readLine()) != null) {
+//                        res.append(inputLine + "\n");
+//                    }
+//                    in.close();
+//
+//                    // print result
+//                    System.out.println(res.toString());
+//                } else {
+//                    System.out.println("GET request not worked");
+//                }
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//
+//            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+//        });
+
+       // spotifyDao.OAuth();
+        get("/auth", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
-            boolean authenticated = true;
+            final String code = request.queryParams("code");
+            //System.out.println(code);
+
+            final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = spotifyApi.authorizationCodeGrant(code).build().getAsync();
+
+            /* Add callbacks to handle success and failure */
+            Futures.addCallback(authorizationCodeCredentialsFuture, new FutureCallback<AuthorizationCodeCredentials>() {
+                @Override
+                public void onSuccess(AuthorizationCodeCredentials authorizationCodeCredentials) {
+    /* The tokens were retrieved successfully! */
+                    System.out.println("Successfully retrieved an access token! " + authorizationCodeCredentials.getAccessToken());
+                    System.out.println("The access token expires in " + authorizationCodeCredentials.getExpiresIn() + " seconds");
+                    System.out.println("Luckily, I can refresh it using this refresh token! " +     authorizationCodeCredentials.getRefreshToken());
+
+    /* Set the access token and refresh token so that they are used whenever needed */
+                    spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
+                    spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+    /* Let's say that the client id is invalid, or the code has been used more than once,
+     * the request will fail. Why it fails is written in the throwable's message. */
+
+                }
+            });
+
+            final CurrentUserRequest currentUserRequest = spotifyApi.getMe().build();
+
+            try {
+                final com.wrapper.spotify.models.User user = currentUserRequest.get();
+
+                System.out.println("Display name: " + user.getId());
+
+                System.out.println("Email: " + user.getEmail());
+
+                System.out.println("Images:");
+                for (Image image : user.getImages()) {
+                    System.out.println(image.getUrl());
+                }
+
+                System.out.println("This account is a " + user.getProduct() + " account");
+
+                model.put("user", user.getId());
+            } catch (Exception e) {
+                System.out.println("Something went wrong!" + e.getMessage());
+            }
+
+            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+        });
+
+        // FILTERS
+//        before((request, response) -> {
+//            Map<String, Object> model = new HashMap<>();
+//            boolean authenticated = false;
+//            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+//           // System.out.println(authorizeURL);
+//            model.put("authorizeURL", authorizeURL);
+//
+
             /*
             *  Logic to check if user is Authenticated
             * */
-            if (!authenticated) {
-                halt(401, new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs")));
-            }
+//
+//            final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = spotifyApi.authorizationCodeGrant(spotifyDao.getCode()).build().getAsync();
+//
+//        /* Add callbacks to handle success and failure */
+//            Futures.addCallback(authorizationCodeCredentialsFuture, new FutureCallback<AuthorizationCodeCredentials>() {
+//                @Override
+//                public void onSuccess(AuthorizationCodeCredentials authorizationCodeCredentials) {
+//    /* The tokens were retrieved successfully! */
+//                    System.out.println("Successfully retrieved an access token! " + authorizationCodeCredentials.getAccessToken());
+//                    System.out.println("The access token expires in " + authorizationCodeCredentials.getExpiresIn() + " seconds");
+//                    System.out.println("Luckily, I can refresh it using this refresh token! " +     authorizationCodeCredentials.getRefreshToken());
+//
+//    /* Set the access token and refresh token so that they are used whenever needed */
+//                    spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
+//                    spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+//                }
+//
+//                @Override
+//                public void onFailure(Throwable throwable) {
+//    /* Let's say that the client id is invalid, or the code has been used more than once,
+//     * the request will fail. Why it fails is written in the throwable's message. */
+//
+//                }
+//            });
+
+//            if (!authenticated) {
+//                halt(401, new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs")));
+//            }
+//        });
+
+        /*
+        *   Testing Purposes
+        * */
+
+
+        // Define scopes
+
+
+
+        //System.out.println(authorizeURL);
+//        System.out.println(spotifyApi.);
+//        System.out.println(ticketMasterDao.getNextShow("Faye Carol").getLocalDate());
+       // System.out.println(spotifyDao.getTopArtist());
+
+        // EXCEPTIONS FILTER
+        exception(ApiException.class, (exc, req, res) -> {
+            Map<String, Object> jsonMap = new HashMap<>();
+            jsonMap.put("status", exc.getStatusCode());
+            jsonMap.put("errorMessage", exc.getMessage());
+            res.type("application/json");
+            res.status(exc.getStatusCode());
+            res.body(gson.toJson(jsonMap));
         });
 
-
-        String route = "https://api.spotify.com/v1/me/top/artists";
-        String accessToken = "BQDZl9FBQI4DnN8hWp0dQFbqzKzMWFQfsgZEw9WmD747O-Nlyq5K3tshegdS8JwTz8pjep4ukT6VEbbe8D64PXfhGqkVYt5Oi_izAwkDAE90KwDajbX9X-5BuxTQTZAomnJSPE1MRPGaVlsHiIUGtlyy";
-
-        try {
-            URL url = new URL(route);
-            HttpURLConnection request = (HttpURLConnection) url.openConnection();
-
-            request.setRequestMethod("GET");
-            request.setRequestProperty("Authorization", "Bearer " + accessToken);
-
-            JsonParser jsonParser = new JsonParser();
-            JsonElement jsonElement = jsonParser.parse(new InputStreamReader((InputStream) request.getContent()));
-
-            JsonObject response = jsonElement.getAsJsonObject()
-                    .getAsJsonArray("items")
-                    .get(0).getAsJsonObject();
-
-//            JsonObject response =
-            System.out.println(ticketMasterDao.getNextShow("Faye Carol").getLocalDate());
-            System.out.println(spotifyDao.getTopArtist());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // AFTER FILTER
+//        after((request, response) -> {
+//           response.type("application/json");
+//        });
     }
 }

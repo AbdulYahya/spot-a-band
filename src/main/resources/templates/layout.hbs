@@ -25,9 +25,16 @@
         <a class="py-2 mr-5 d-none d-md-inline-block" href="#">Route 3</a>
         <!-- Unless user is authenticated, show log in button -->
         {{#unless authenticated}}
-          <a class="py-2 ml-5 d-none d-md-inline-block text-success" href="/signin">Sign In</a>
+          <!--<a class="py-2 ml-5 d-none d-md-inline-block text-success" href="/signin">Sign In</a>-->
+            <!--<a href="{{ authorizeURL }}" class="btn btn-lg btn-spotify">Sign in</a>-->
+            <!--<a href="/auth" class="btn btn-lg btn-spotify">Sign in</a>-->
+
+            {{#unless user}}
+                <a href="{{ authorizeURL }}" class="btn btn-lg btn-spotify">Sign in</a>
+            {{/unless}}
+                <a class="py-2 ml-5 d-none d-md-inline-block text-success" href="/profile/{{ user }}">{{ user }}</a>
         {{/unless}}
-          <a class="py-2 ml-5 d-none d-md-inline-block text-success" href="/profile/{{ user }}">{{ user }}</a>
+
       </div>
     </nav>
   {{/block}}
