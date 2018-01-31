@@ -68,9 +68,10 @@ public class User {
         }
     }
 
-    private User(Builder builder){
+    private User(Builder builder) {
         this.spotifyClientId = builder.spotifyClientId;
         this.spotifyClientSecret = builder.spotifyClientSecret;
+
         this.spotifyUserId = builder.spotifyUserId;
         this.spotifyToken = builder.spotifyToken;
         this.spotifyScopes = builder.spotifyScopes;
