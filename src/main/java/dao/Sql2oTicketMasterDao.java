@@ -67,7 +67,6 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
             //assembled url:
             String apiRequest = (route + classificationName + artist + dmaId + apiKey).replaceAll(" ", "+");
-            System.out.println(apiRequest);
             //sent request to ticketmaster api
             try {
                 URL url = new URL(apiRequest);
@@ -107,7 +106,6 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                     if (json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges") != null) {
                         JsonObject priceRange = json.getAsJsonObject().getAsJsonObject("_embedded").getAsJsonArray("events").get(0).getAsJsonObject().getAsJsonArray("priceRanges").get(0).getAsJsonObject();
                         price = ("$" + priceRange.get("min").getAsString() + " to $" + priceRange.get("max").getAsString());
-                        System.out.println(price);
                     } else {
                         price = "no ticket price data";
                     }
