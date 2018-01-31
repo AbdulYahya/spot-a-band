@@ -1,5 +1,6 @@
 package dao;
 
+import com.wrapper.spotify.models.Playlist;
 import models.Artist;
 import org.junit.After;
 import org.junit.Before;
@@ -42,5 +43,4 @@ public class Sql2oSpotifyDaoTest {
         spotifyDao.add(otherArtist);
         assertEquals(2, spotifyDao.findById(2).getId());
     }
-
 }
