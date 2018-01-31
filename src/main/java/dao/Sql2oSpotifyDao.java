@@ -141,6 +141,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
         return null;
     }
 
+
     @Override
     public Properties loadProperties() {
         Properties prop = new Properties();
@@ -152,4 +153,5 @@ public class Sql2oSpotifyDao implements SpotifyDao {
         }
         return prop;
     }
+
 }
