@@ -12,7 +12,7 @@ public interface TicketMasterDao {
     //============create
 
     //get next show in town for an artist
-    Event getNextPortlandShow(String artistName);
+    List<Event> getNextPortlandShow(List<String> artists);
 
     List<Event> getTonightsPortlandShows();
 
