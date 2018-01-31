@@ -244,7 +244,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         //API call to ticketmaster url split into parameters
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
         String classificationName = "&classificationName=music";
-        String startDateTime = String.format("&startDateTime=%s%s", getStartDate(date), "T00:00:00Z");
+        String startDateTime = String.format("&startDateTime=%s%s", getStartDate(date), "T23:59:59Z");
         String endDateTime = String.format("&endDateTime=%s%s", getEndDate(date), "T00:00:00Z");
         String geoPoint = String.format("&geoPoint=%s", geoHash);
         String radius = String.format("&radius=%s", "25");
