@@ -255,9 +255,10 @@ public class App {
 
 
 
+
         //System.out.println(authorizeURL);
 //        System.out.println(spotifyApi.);
-//        System.out.println(ticketMasterDao.getNextShow("Faye Carol").getLocalDate());
+//        System.out.println(ticketMasterDao.getNextPortlandShow("Faye Carol").getLocalDate());
        // System.out.println(spotifyDao.getTopArtist());
 
         // EXCEPTIONS FILTER

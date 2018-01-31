@@ -1,5 +1,6 @@
 package dao;
 
+import com.github.davidmoten.geo.GeoHash;
 import com.google.gson.*;
 import models.*;
 import org.sql2o.Connection;
@@ -10,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -35,9 +37,17 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         return  sdf.format(tomorrow).replaceAll("/", "-");
     }
 
+    public String getToday(){
+        String datePatternToUse = "yyyy/MM/dd";
+        SimpleDateFormat sdf = new SimpleDateFormat(datePatternToUse);
+        Calendar calendar = Calendar.getInstance();
+        Date today = calendar.getTime();
+        return  sdf.format(today).replaceAll("/", "-");
+    }
+
 
     @Override
-    public Event getNextShow(String artistName) {
+    public Event getNextPortlandShow(String artistName) {
 
         //event to be returned
         Event event = new Event(null, null, null, null, null);
@@ -46,11 +56,11 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
         String classificationName = "&classificationName=music";
         String artist = String.format("&keyword=%s", artistName);
-        String marketId = "&dmaId=362";
+        String dmaId = "&dmaId=362";
         String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
 
         //assembled url:
-        String apiRequest = (route + classificationName + artist + marketId + apiKey).replaceAll(" ", "+");
+        String apiRequest = (route + classificationName + artist + dmaId + apiKey).replaceAll(" ", "+");
 
         //sent request to ticketmaster api
         try {
@@ -110,7 +120,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
     }
 
     @Override
-    public List<Event> getTonightsShows() {
+    public List<Event> getTonightsPortlandShows() {
         //list of events to be returned
         List<Event> tonightsShows = new ArrayList<>();
 
@@ -120,11 +130,12 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
         String classificationName = "&classificationName=music";
         String endDateTime = String.format("&endDateTime=%s%s", getTomorrow(), "T00:00:00Z");
-        String marketId = "&dmaId=362";
+        String dmaId = "&dmaId=362";
         String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
 
         //assembled url:
-        String apiRequest = (route + classificationName + endDateTime + marketId + apiKey).replaceAll(" ", "+");
+        String apiRequest = (route + classificationName + endDateTime + dmaId + apiKey).replaceAll(" ", "+");
+
         try {
             URL url = new URL(apiRequest);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -144,7 +155,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                         .getAsJsonArray("events")
                         .get(i)
                         .getAsJsonObject();
-                JsonObject date = json.getAsJsonObject()
+                JsonObject eventDate = json.getAsJsonObject()
                         .getAsJsonObject("_embedded")
                         .getAsJsonArray("events")
                         .get(i).getAsJsonObject()
@@ -160,7 +171,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                 event.setName(apiResponse.get("name").getAsString());
                 event.setTicketMasterId(apiResponse.get("id").getAsString());
                 event.setUrl(apiResponse.get("url").getAsString());
-                event.setLocalDate(date.get("localDate").getAsString());
+                event.setLocalDate(eventDate.get("localDate").getAsString());
                 event.setLocalTime(time.toString());
                 tonightsShows.add(event);
             }
@@ -169,6 +180,97 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         }
 
         return tonightsShows;
+    }
+
+    @Override
+    public List<Event> getShowsForCityOnDay(String address, String date) {
+        //list of events to be returned
+        List<Event> shows = new ArrayList<>();
+
+        //API call to google geocoding api to convert address into geoPoint (geoHash)
+        String geoCodeRoute = "https://maps.googleapis.com/maps/api/geocode/json?";
+        String geoCodeAddress = "&address=" + address;
+        String geoCodeApiKey = "&key=AIzaSyCM0ugxgeW2rNTm3IKO5Mkrb7YktGMUySU";
+        String geoCodeApiRequest = (geoCodeRoute + geoCodeAddress + geoCodeApiKey).replaceAll(" ", "+");
+        double lat;
+        double lng;
+        DecimalFormat df = new DecimalFormat("###.######");
+        String geoHash =  new String();
+
+        try{
+            URL url = new URL(geoCodeApiRequest);
+            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            request.connect();
+            JsonParser parser = new JsonParser();
+            JsonElement json = parser.parse(new InputStreamReader((InputStream) request.getContent()));
+            JsonObject location = json.getAsJsonObject().getAsJsonArray("results").get(0).getAsJsonObject().getAsJsonObject("geometry").getAsJsonObject("location");
+            //get lat and long
+            lat = Double.parseDouble(df.format(location.get("lat").getAsDouble()));
+            lng = Double.parseDouble(df.format(location.get("lng").getAsDouble()));
+
+
+            geoHash = GeoHash.encodeHash(lat, lng, 9);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //API call to ticketmaster url split into parameters
+        String route = "https://app.ticketmaster.com/discovery/v2/events.json?";
+        String classificationName = "&classificationName=music";
+        String endDateTime = String.format("&endDateTime=%s%s", date, "T23:59:59Z");
+        String geoPoint = String.format("&geoPoint=%s", geoHash);
+        String radius = String.format("&radius=%s", "25");
+        String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
+
+        //assembled url:
+        String apiRequest = (route + classificationName + endDateTime + geoPoint + radius + apiKey).replaceAll(" ", "+");
+        try {
+            URL url = new URL(apiRequest);
+            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            request.connect();
+            JsonParser parser = new JsonParser();
+            JsonElement json = parser.parse(new InputStreamReader((InputStream) request.getContent()));
+            //get array of tonight's events in json format
+            JsonArray eventsArray = json.getAsJsonObject()
+                    .getAsJsonObject("_embedded")
+                    .getAsJsonArray("events");
+
+            //loop through events array and add each event to list
+            for (int i = 0; i < eventsArray.size(); i++) {
+                Event event = new Event("", "", "", "", "");
+                JsonObject apiResponse = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(i)
+                        .getAsJsonObject();
+                JsonObject eventDate = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(i).getAsJsonObject()
+                        .getAsJsonObject("dates")
+                        .getAsJsonObject("start");
+                JsonPrimitive time = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(i).getAsJsonObject()
+                        .getAsJsonObject("dates")
+                        .getAsJsonObject("start")
+                        .getAsJsonPrimitive("localTime");
+                event.setName(apiResponse.get("name").getAsString());
+                event.setTicketMasterId(apiResponse.get("id").getAsString());
+                event.setUrl(apiResponse.get("url").getAsString());
+                event.setLocalDate(eventDate.get("localDate").getAsString());
+                event.setLocalTime(time.toString());
+                shows.add(event);
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return shows;
+
     }
 
     @Override
