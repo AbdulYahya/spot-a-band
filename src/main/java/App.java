@@ -8,9 +8,11 @@ import com.wrapper.spotify.Api;
 import com.wrapper.spotify.methods.CurrentUserRequest;
 import com.wrapper.spotify.models.AuthorizationCodeCredentials;
 import com.wrapper.spotify.models.Image;
+import dao.Sql2oMerge;
 import dao.Sql2oSpotifyDao;
 import dao.Sql2oTicketMasterDao;
 import exceptions.ApiException;
+import models.Event;
 import models.User;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
@@ -45,7 +47,7 @@ public class App {
 
         Sql2oTicketMasterDao ticketMasterDao = new Sql2oTicketMasterDao(sql2o);
         Sql2oSpotifyDao spotifyDao = new Sql2oSpotifyDao(sql2o);
-
+        Sql2oMerge sql2oMerge = new Sql2oMerge(sql2o);
 
         final List<String> scopes = Arrays.asList("user-top-read, user-read-private, user-read-email");
         final String state = RandomStringUtils.random(34, true, true);
@@ -53,12 +55,14 @@ public class App {
         // Root - Index
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
-
             String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
 
+            List<Event> artistsInTown = sql2oMerge.whenInTown();
+            System.out.println(artistsInTown);
             model.put("authorizeURL", authorizeURL);
             model.put("user", request.session().attribute("user"));
             model.put("email", request.session().attribute("email"));
+            model.put("artistsInTowm", artistsInTown);
 //            model.put("topArtistLink", spotifyDao.getTopArtist());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
@@ -89,11 +93,16 @@ public class App {
             CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
             com.wrapper.spotify.models.User user = spotifyDao.getCurrentUser(currentUserRequest);
 
+
             model.put("user", user.getEmail());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
 
 
+        // BEFORE FILTER
+        before((request, response) -> {
+            response.redirect("/auth");
+        });
         // EXCEPTIONS FILTER
         exception(ApiException.class, (exc, req, res) -> {
             Map<String, Object> jsonMap = new HashMap<>();
