@@ -1,14 +1,22 @@
 package dao;
 
 
+import com.wrapper.spotify.Api;
 import models.Artist;
+
+import java.util.Properties;
 
 public interface SpotifyDao {
     //CREATE
     void add(Artist artist);
 
-    String oAuth(String code); // Move authorization methods from App.java to here
+    Api apiConstructor();
+    Api oAuth(String code); // Move authorization methods from App.java to here
+
     String getCode();
+    String getAccessToken();
+
+    void setAccessToken(String accessToken);
 
 //    Artist getArtistFromSpotify();
 
@@ -16,5 +24,7 @@ public interface SpotifyDao {
     Artist findById(int id);
 
     String getTopArtist();
+
+    Properties loadProperties();
 
 }
