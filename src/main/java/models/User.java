@@ -1,5 +1,7 @@
 package models;
 
+import java.util.List;
+
 public class User {
 
     int id;
@@ -7,6 +9,7 @@ public class User {
     private String spotifyClientSecret;
     private String spotifyUserId;
     private String spotifyToken;
+    private List<String> spotifyScopes;
 
     public String getSpotifyClientId(){
         return this.spotifyClientId;
@@ -24,11 +27,16 @@ public class User {
         return this.spotifyToken;
     }
 
+    public List<String> getSpotifyScopes(){
+        return this.spotifyScopes;
+    }
+
     public static class Builder {
         String spotifyClientId;
         String spotifyClientSecret;
         String spotifyUserId;
         String spotifyToken;
+        List<String> spotifyScopes;
 
         public Builder spotifyClientId(String clientId){
             this.spotifyClientId = clientId;
@@ -50,6 +58,11 @@ public class User {
             return this;
         }
 
+        public Builder spotifyScopes(List<String> scopes){
+            this.spotifyScopes = scopes;
+            return this;
+        }
+
         public User Build() {
             return new User(this);
         }
@@ -58,8 +71,10 @@ public class User {
     private User(Builder builder) {
         this.spotifyClientId = builder.spotifyClientId;
         this.spotifyClientSecret = builder.spotifyClientSecret;
-//        this.spotifyUserId = builder.spotifyUserId;
-//        this.spotifyToken = builder.spotifyToken;
+
+        this.spotifyUserId = builder.spotifyUserId;
+        this.spotifyToken = builder.spotifyToken;
+        this.spotifyScopes = builder.spotifyScopes;
     }
 }
 // user =  new User.Builder
