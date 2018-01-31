@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface Merge {
 
-    void eventsPlaylist(List<Event> events);
+    void eventsPlaylist(String city, String date);
     /*for (event : events) {
         event.getName();
     }*/
