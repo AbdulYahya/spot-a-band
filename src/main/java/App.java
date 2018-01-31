@@ -56,7 +56,6 @@ public class App {
 
             String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
 
-
             model.put("authorizeURL", authorizeURL);
             model.put("user", request.session().attribute("user"));
             model.put("email", request.session().attribute("email"));
@@ -87,21 +86,10 @@ public class App {
             Map<String, Object> model = new HashMap<>();
             final String code = request.queryParams("code");
 
-            final CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
+            CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
+            com.wrapper.spotify.models.User user = spotifyDao.getCurrentUser(currentUserRequest);
 
-            System.out.println(spotifyDao.getTopArtist());
-
-            try {
-                final com.wrapper.spotify.models.User user = currentUserRequest.get();
-
-                request.session().attribute("user", user.getId());
-                request.session().attribute("email", user.getEmail());
-                model.put("user", user.getId());
-                model.put("email", user.getEmail());
-            } catch (Exception e) {
-                System.out.println("Something went wrong!" + e.getMessage());
-            }
-
+            model.put("user", user.getEmail());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
 

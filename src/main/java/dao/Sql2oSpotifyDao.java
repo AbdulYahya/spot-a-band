@@ -30,6 +30,7 @@ import static spark.Spark.get;
 
 public class Sql2oSpotifyDao implements SpotifyDao {
     private final Sql2o sql2o;
+    private User currentUser;
     private String code;
     private String accessToken;
 
@@ -88,6 +89,17 @@ public class Sql2oSpotifyDao implements SpotifyDao {
         });
 
         return spotifyApi;
+    }
+
+    @Override
+    public User getCurrentUser(CurrentUserRequest currentUserRequest) {
+        try {
+            this.currentUser = currentUserRequest.get();
+        } catch (Exception e) {
+            System.out.println("currentUser Method Failed!");
+            e.printStackTrace();
+        }
+        return this.currentUser;
     }
 
     @Override
