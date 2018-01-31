@@ -221,7 +221,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
         String classificationName = "&classificationName=music";
         String endDateTime = String.format("&endDateTime=%s%s", date, "T23:59:59Z");
         String geoPoint = String.format("&geoPoint=%s", geoHash);
-        String radius = String.format("&radius=%s", "50");
+        String radius = String.format("&radius=%s", "25");
         String apiKey = "&apikey=UVOeCoYG9hwSCSiAfubUzl9vGGM1dXTx";
 
         //assembled url:
