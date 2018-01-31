@@ -16,7 +16,8 @@ public interface SpotifyDao {
     Api apiConstructor();
     Api oAuth(String code); // Move authorization methods from App.java to here
 
-    User getCurrentUser(CurrentUserRequest currentUserRequest);
+    User setCurrentUser(CurrentUserRequest currentUserRequest);
+    User getCurrentUser();
 
     String getCode();
     String getAccessToken();

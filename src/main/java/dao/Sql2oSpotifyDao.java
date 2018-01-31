@@ -89,13 +89,25 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     }
 
     @Override
-    public User getCurrentUser(CurrentUserRequest currentUserRequest) {
+    public User setCurrentUser(CurrentUserRequest currentUserRequest) {
         try {
             this.currentUser = currentUserRequest.get();
         } catch (Exception e) {
             System.out.println("currentUser Method Failed!");
             e.printStackTrace();
         }
+        return this.currentUser;
+    }
+
+    @Override
+    public User getCurrentUser() {
+//        CurrentUserRequest currentUserRequest = oAuth(getCode()).getMe().build();
+//        try {
+//            this.currentUser = currentUserRequest.get();
+//        } catch (Exception e) {
+//            System.out.println("currentUser Method Failed!");
+//            e.printStackTrace();
+//        }
         return this.currentUser;
     }
 

@@ -22,8 +22,9 @@ public class Sql2oMerge implements Merge{
     Sql2oSpotifyDao spotifyDao = new Sql2oSpotifyDao(sql2o);
     Sql2oTicketMasterDao ticketMasterDao = new Sql2oTicketMasterDao(sql2o);
 
-    CurrentUserRequest currentUserRequest = spotifyDao.oAuth(spotifyDao.getCode()).getMe().build();
-    User user = spotifyDao.getCurrentUser(currentUserRequest);
+//    CurrentUserRequest currentUserRequest = spotifyDao.oAuth(spotifyDao.getCode()).getMe().build();
+//    User user = spotifyDao.getCurrentUser(currentUserRequest);
+    User user;// = spotifyDao.getCurrentUser();
 
     @Override
     public void eventsPlaylist(String city, String date){

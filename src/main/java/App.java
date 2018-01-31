@@ -55,14 +55,23 @@ public class App {
         // Root - Index
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
-            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
+            String test = request.session().attribute("user");
+            System.out.println(test);
+            if (request.session().attribute("user") != null) {
+                List<Event> events = sql2oMerge.whenInTown();
 
-            List<Event> artistsInTown = sql2oMerge.whenInTown();
-            System.out.println(artistsInTown);
-            model.put("authorizeURL", authorizeURL);
-            model.put("user", request.session().attribute("user"));
-            model.put("email", request.session().attribute("email"));
-            model.put("artistsInTowm", artistsInTown);
+                model.put("events", events);
+                return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+            } else {
+                response.redirect("/signin");
+
+            }
+//            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
+            //System.out.println(artistsInTown);
+//            model.put("authorizeURL", authorizeURL);
+//            model.put("user", request.session().attribute("user"));
+//            model.put("email", request.session().attribute("email"));
+
 //            model.put("topArtistLink", spotifyDao.getTopArtist());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
@@ -74,8 +83,35 @@ public class App {
 //                    return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
 //        });
 
+        // get("/
+        get("/signin", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
+            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
+
+            model.put("authorizeURL", authorizeURL);
+            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs"));
+        });
 
 
+
+        get("/auth", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
+            final String code = request.queryParams("code");
+
+//            System.out.println(code);
+        //    List<Event> artistsInTown = sql2oMerge.whenInTown();
+            CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
+            com.wrapper.spotify.models.User user = spotifyDao.setCurrentUser(currentUserRequest);
+
+//            System.out.println(spotifyDao.getCurrentUser());
+            request.session().attribute("user", user.getEmail());
+            model.put("user", user.getEmail());
+            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+        });
+
+        /*
+        *   Dynamic Routes
+        * */
         get("/profile/:user", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
             String user = request.params("user");
@@ -85,24 +121,35 @@ public class App {
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "profile.hbs"));
         });
 
-
-        get("/auth", (request, response) -> {
-            Map<String, Object> model = new HashMap<>();
-            final String code = request.queryParams("code");
-
-            CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
-            com.wrapper.spotify.models.User user = spotifyDao.getCurrentUser(currentUserRequest);
-
-
-            model.put("user", user.getEmail());
-            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
-        });
-
-
         // BEFORE FILTER
-        before((request, response) -> {
-            response.redirect("/auth");
-        });
+//        before((request, response) -> {
+//            boolean isAuthenticated = false;
+//            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
+//
+//         //   if (spotifyDao.getCode() == null) {
+////            if (!isAuthenticated) {
+////                try {
+////                    URL authRequest = new URL(authorizeURL);
+////                    HttpURLConnection getRequest = (HttpURLConnection) authRequest.openConnection();
+////
+////                    getRequest.setRequestMethod("GET");
+////
+////                    if (getRequest.getResponseCode() == HttpURLConnection.HTTP_OK) {
+////                        isAuthenticated = true;
+////                        response.redirect("/auth");
+////                    }
+////
+////                    System.out.println(getRequest.getResponseCode());
+////                    System.out.println(getRequest.getResponseMessage());
+////                    System.out.println(getRequest.getHeaderFields());
+////                    System.out.println(spotifyDao.getCode());
+////                } catch (IOException e) {
+////                    e.printStackTrace();
+////                }
+////            } else {
+////                isAuthenticated = false;
+////            }
+//        });
         // EXCEPTIONS FILTER
         exception(ApiException.class, (exc, req, res) -> {
             Map<String, Object> jsonMap = new HashMap<>();
