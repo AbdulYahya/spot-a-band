@@ -11,9 +11,6 @@ public interface SpotifyDao {
     //CREATE
     void add(Artist artist);
 
-    void createPlaylist(String name);
-    void addTracks(List<String> artists, int top);
-
     Api apiConstructor();
     Api oAuth(String code); // Move authorization methods from App.java to here
 
@@ -27,7 +24,7 @@ public interface SpotifyDao {
     //READ
     Artist findById(int id);
 
-    String getTopArtist();
+    List<String> getTopArtist();
 
     Properties loadProperties();
 

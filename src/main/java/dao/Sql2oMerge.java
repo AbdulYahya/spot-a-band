@@ -89,4 +89,9 @@ public class Sql2oMerge implements Merge{
             }
         }
     }
+
+    @Override
+    public void whenInTown(){
+
+    }
 }

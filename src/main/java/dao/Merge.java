@@ -14,4 +14,5 @@ public interface Merge {
         event.getName();
     }*/
 
+    void whenInTown();
 }

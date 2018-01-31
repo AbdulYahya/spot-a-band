@@ -20,10 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static spark.Spark.connect;
 import static spark.Spark.get;
@@ -117,9 +114,10 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     }
 
     @Override
-    public String getTopArtist() {
+    public List<String> getTopArtist() {
         String route = "https://api.spotify.com/v1/me/top/artists";
         String accessToken = getAccessToken();
+        List<String> artists = new ArrayList<>();
 
         try {
             URL url = new URL(route);
@@ -130,12 +128,18 @@ public class Sql2oSpotifyDao implements SpotifyDao {
 
             JsonParser jsonParser = new JsonParser();
             JsonElement jsonElement = jsonParser.parse(new InputStreamReader((InputStream) request.getContent()));
-
-            JsonObject response = jsonElement.getAsJsonObject()
-                    .getAsJsonArray("items")
-                    .get(0).getAsJsonObject();
-
-            return response.get("name").toString();
+            JsonArray itemsArray = jsonElement.getAsJsonObject().getAsJsonArray("items");
+            for (int i = 0; i< itemsArray.size() ;i++){
+                String artistName = jsonElement.getAsJsonObject()
+                        .getAsJsonArray("items")
+                        .get(0).getAsJsonObject().get("name").getAsString();
+                artists.add(artistName);
+            }
+            for (String artist: artists){
+                System.out.println(artist);
+            }
+//            return response.get("name").toString();
+            return artists;
         } catch (IOException e) {
             e.printStackTrace();
         }

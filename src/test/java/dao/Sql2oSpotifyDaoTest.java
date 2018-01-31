@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 
@@ -42,5 +44,10 @@ public class Sql2oSpotifyDaoTest {
         spotifyDao.add(artist);
         spotifyDao.add(otherArtist);
         assertEquals(2, spotifyDao.findById(2).getId());
+    }
+
+    @Test
+    public void getTopArtist_returnsListOfStrings() throws Exception{
+        assert(spotifyDao.getTopArtist() != null);
     }
 }
