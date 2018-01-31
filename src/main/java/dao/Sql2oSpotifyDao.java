@@ -49,6 +49,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             System.out.println(ex);
         }
     }
+
     @Override
     public Api apiConstructor() {
         return Api.builder()
@@ -62,9 +63,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     public Api oAuth(String code) {
         this.code = code;
         Api spotifyApi = apiConstructor();
-        /*
-        *       Containerize entire Spotify oAuth flow in here?
-        * */
+
         final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = spotifyApi.authorizationCodeGrant(code).build().getAsync();
 
             /* Add callbacks to handle success and failure */
@@ -138,11 +137,6 @@ public class Sql2oSpotifyDao implements SpotifyDao {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //String username/login info
-        //String[] artists
-        /*get(path stuff){
-            top artists
-        }*/
 
         return null;
     }
