@@ -1,5 +1,6 @@
 package dao;
 
+import com.google.common.util.concurrent.ExecutionError;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -21,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import static spark.Spark.connect;
 import static spark.Spark.get;
@@ -28,6 +30,7 @@ import static spark.Spark.get;
 public class Sql2oSpotifyDao implements SpotifyDao {
     private final Sql2o sql2o;
     private String code;
+    private String accessToken;
 
     public Sql2oSpotifyDao(Sql2o sql2o) {
         this.sql2o = sql2o;
@@ -46,21 +49,60 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             System.out.println(ex);
         }
     }
+    @Override
+    public Api apiConstructor() {
+        return Api.builder()
+                .clientId(loadProperties().getProperty("SpotifyClientId"))
+                .clientSecret(loadProperties().getProperty("SpotifyClientSecret"))
+                .redirectURI(loadProperties().getProperty("SpotifyRedirectURI"))
+                .build();
+    }
 
     @Override
-    public String oAuth(String code) {
+    public Api oAuth(String code) {
         this.code = code;
-
+        Api spotifyApi = apiConstructor();
         /*
         *       Containerize entire Spotify oAuth flow in here?
         * */
+        final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = spotifyApi.authorizationCodeGrant(code).build().getAsync();
 
-        return code;
+            /* Add callbacks to handle success and failure */
+        Futures.addCallback(authorizationCodeCredentialsFuture, new FutureCallback<AuthorizationCodeCredentials>() {
+            @Override
+            public void onSuccess(AuthorizationCodeCredentials authorizationCodeCredentials) {
+
+                /* Set the access token and refresh token so that they are used whenever needed */
+                spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
+                spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+
+                setAccessToken(authorizationCodeCredentials.getAccessToken());
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                /* Let's say that the client id is invalid, or the code has been used more than once,
+                 * the request will fail. Why it fails is written in the throwable's message. */
+
+            }
+        });
+
+        return spotifyApi;
     }
 
     @Override
     public String getCode() {
         return code;
+    }
+
+    @Override
+    public String getAccessToken() {
+        return this.accessToken;
+    }
+
+    @Override
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     @Override
@@ -76,10 +118,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     @Override
     public String getTopArtist() {
         String route = "https://api.spotify.com/v1/me/top/artists";
-        String accessToken = "";//getCode();
-
-       System.out.println(accessToken);
-        //"AQCm7Ky_49WrUdjfvLO_cgri8LmtiQq4Eef9oDNIevDLuXAr8JEum3ZUytDGgZYnSFpo-mpGNHYWOnDddmI4tZ33MVcvzwk5qMvklQpw9-IUKlVu1Z_kd7Ys6tvjr6eN98sI3509BIuBJgnD9EQxzcOFQhZ3AZ0gaWxf9HrpXZ143O84zWnzgcgqKPis30ij3vKAqZunkQvem-hgYdfO-TfEIj6VxmM9hhlA2RVAThLuc5K-WJw";
+        String accessToken = getAccessToken();
 
         try {
             URL url = new URL(route);
@@ -106,5 +145,17 @@ public class Sql2oSpotifyDao implements SpotifyDao {
         }*/
 
         return null;
+    }
+
+    @Override
+    public Properties loadProperties() {
+        Properties prop = new Properties();
+
+        try {
+            prop.load(this.getClass().getResourceAsStream("/config.properties"));
+        } catch (Exception e) {
+
+        }
+        return prop;
     }
 }

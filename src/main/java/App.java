@@ -46,11 +46,6 @@ public class App {
         Sql2oTicketMasterDao ticketMasterDao = new Sql2oTicketMasterDao(sql2o);
         Sql2oSpotifyDao spotifyDao = new Sql2oSpotifyDao(sql2o);
 
-        Api spotifyApi = Api.builder()
-                .clientId("233f1b1faff04060b1c0d17897b65b58")
-                .clientSecret("289b7c80f70a4da99134890f0879e35f")
-                .redirectURI("http://localhost:4567/auth")
-                .build();
 
         final List<String> scopes = Arrays.asList("user-top-read, user-read-private, user-read-email");
         final String state = RandomStringUtils.random(34, true, true);
@@ -59,7 +54,7 @@ public class App {
         // Root - Index
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
-            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
 
             /*
             *   Below auth/user vars are used for testing header-nav only
@@ -91,7 +86,7 @@ public class App {
 
         get("/signin", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
-            String authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
 
             model.put("authorizeURL", authorizeURL);
 
@@ -150,53 +145,18 @@ public class App {
 //            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
 //        });
 
-       // spotifyDao.OAuth();
+
         get("/auth", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
             final String code = request.queryParams("code");
-            //System.out.println(code);
 
-            final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = spotifyApi.authorizationCodeGrant(code).build().getAsync();
+            final CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
 
-            /* Add callbacks to handle success and failure */
-            Futures.addCallback(authorizationCodeCredentialsFuture, new FutureCallback<AuthorizationCodeCredentials>() {
-                @Override
-                public void onSuccess(AuthorizationCodeCredentials authorizationCodeCredentials) {
-    /* The tokens were retrieved successfully! */
-                    System.out.println("Successfully retrieved an access token! " + authorizationCodeCredentials.getAccessToken());
-                    System.out.println("The access token expires in " + authorizationCodeCredentials.getExpiresIn() + " seconds");
-                    System.out.println("Luckily, I can refresh it using this refresh token! " +     authorizationCodeCredentials.getRefreshToken());
-
-    /* Set the access token and refresh token so that they are used whenever needed */
-                    spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
-                    spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
-                }
-
-                @Override
-                public void onFailure(Throwable throwable) {
-    /* Let's say that the client id is invalid, or the code has been used more than once,
-     * the request will fail. Why it fails is written in the throwable's message. */
-
-                }
-            });
-
-            final CurrentUserRequest currentUserRequest = spotifyApi.getMe().build();
+            System.out.println(spotifyDao.getTopArtist());
 
             try {
                 final com.wrapper.spotify.models.User user = currentUserRequest.get();
 
-                System.out.println("Display name: " + user.getId());
-
-                System.out.println("Email: " + user.getEmail());
-
-                System.out.println("Images:");
-                for (Image image : user.getImages()) {
-                    System.out.println(image.getUrl());
-                }
-
-                System.out.println("This account is a " + user.getProduct() + " account");
-
-                // Store user.id in a session
                 request.session().attribute("user", user.getId());
                 model.put("user", user.getId());
             } catch (Exception e) {
@@ -261,7 +221,7 @@ public class App {
         //System.out.println(authorizeURL);
 //        System.out.println(spotifyApi.);
 //        System.out.println(ticketMasterDao.getNextPortlandShow("Faye Carol").getLocalDate());
-       // System.out.println(spotifyDao.getTopArtist());
+
 
         // EXCEPTIONS FILTER
         exception(ApiException.class, (exc, req, res) -> {
