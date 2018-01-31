@@ -5,8 +5,6 @@
       <p class="lead font-weight-normal">Say something here about the app...</p>
       <a class="btn btn-outline-secondary" href="{{ authorizeURL }}">Log in to Spotify</a>
     </div>
-    <div class="product-device box-shadow d-none d-md-block"></div>
-    <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
   </div>
 
   <div class="d-md-flex flex-md-equal w-100 my-md-3 pl-md-3">
@@ -14,15 +12,27 @@
       <div class="my-3 py-3">
         <h2 class="display-5">Section for finding a band based on Spotify user's top artists. </h2>
         <p class="lead">subheading.</p>
+          <button>Show me the next show!</button>
+          {{#if user}}
+
+          {{/if}}
+
       </div>
-      <div class="bg-light box-shadow mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
     </div>
     <div class="bg-light mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
       <div class="my-3 p-3">
         <h2 class="display-5">Section for getting a playlist from artists in town.</h2>
         <p class="lead">subheading.</p>
+          <form>
+              <label>City</label>
+              <input type="text">
+              <br>
+              <label>Day</label>
+              <input type="text">
+              <br>
+              <button>Make me a playlist from local performances</button>
+          </form>
       </div>
-      <div class="bg-dark box-shadow mx-auto" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"></div>
     </div>
   </div>
 

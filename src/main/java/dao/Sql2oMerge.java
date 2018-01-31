@@ -1,15 +1,10 @@
 package dao;
 
-import com.wrapper.spotify.methods.AddTrackToPlaylistRequest;
-import com.wrapper.spotify.methods.ArtistSearchRequest;
-import com.wrapper.spotify.methods.PlaylistCreationRequest;
-import com.wrapper.spotify.methods.TopTracksRequest;
-import com.wrapper.spotify.models.Page;
-import com.wrapper.spotify.models.Playlist;
-import com.wrapper.spotify.models.SimpleArtist;
-import com.wrapper.spotify.models.Track;
-import models.Artist;
-import models.Event;
+import com.wrapper.spotify.methods.*;
+import com.wrapper.spotify.models.*;
+import com.wrapper.spotify.models.Artist;
+import com.wrapper.spotify.models.User;
+import models.*;
 import org.sql2o.Sql2o;
 
 import java.util.ArrayList;
@@ -27,11 +22,14 @@ public class Sql2oMerge implements Merge{
     Sql2oSpotifyDao spotifyDao = new Sql2oSpotifyDao(sql2o);
     Sql2oTicketMasterDao ticketMasterDao = new Sql2oTicketMasterDao(sql2o);
 
+    CurrentUserRequest currentUserRequest = spotifyDao.oAuth(spotifyDao.getCode()).getMe().build();
+    User user = spotifyDao.getCurrentUser(currentUserRequest);
+
     @Override
     public void eventsPlaylist(String city, String date){
         //create a playlist of name "playing in [CITY] on [DATE]"
         String playlistID = "";
-        final PlaylistCreationRequest request = spotifyDao.apiConstructor().createPlaylist("","playing in" +city +" on " + date)
+        final PlaylistCreationRequest request = spotifyDao.apiConstructor().createPlaylist(user.getId(),"playing in" +city +" on " + date)
                 .publicAccess(true)
                 .build();
 
@@ -82,7 +80,7 @@ public class Sql2oMerge implements Merge{
                     topTrackIDs.add(track.getId());
                 }
 
-                final AddTrackToPlaylistRequest playlistAdd = spotifyDao.apiConstructor().addTracksToPlaylist("", playlistID, topTrackIDs).build();
+                final AddTrackToPlaylistRequest playlistAdd = spotifyDao.apiConstructor().addTracksToPlaylist(user.getId(), playlistID, topTrackIDs).build();
 
             }catch (Exception e) {
 
@@ -91,7 +89,9 @@ public class Sql2oMerge implements Merge{
     }
 
     @Override
-    public void whenInTown(){
-
+    public List<Event> whenInTown(){
+        List<String> artists = spotifyDao.getTopArtist();
+        List<Event> events = ticketMasterDao.getNextPortlandShow(artists);
+        return events;
     }
 }
