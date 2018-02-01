@@ -2,6 +2,8 @@
 
 import com.google.gson.*;
 import com.wrapper.spotify.methods.CurrentUserRequest;
+import com.wrapper.spotify.methods.PlaylistRequest;
+import com.wrapper.spotify.models.Playlist;
 import dao.Sql2oMerge;
 import dao.Sql2oSpotifyDao;
 import dao.Sql2oTicketMasterDao;
@@ -35,7 +37,7 @@ public class App {
         Sql2oSpotifyDao spotifyDao = new Sql2oSpotifyDao(sql2o);
         Sql2oMerge sql2oMerge = new Sql2oMerge(sql2o);
 
-        final List<String> scopes = Arrays.asList("user-top-read, user-read-private, user-read-email");
+        final List<String> scopes = Arrays.asList("user-top-read, user-read-private, user-read-email, playlist-modify-public");
         final String state = RandomStringUtils.random(34, true, true);
 
         // Root - Index
@@ -43,6 +45,7 @@ public class App {
             Map<String, Object> model = new HashMap<>();
             // Authenticate user by checking if session attribute 'user' holds any data
             if (request.session().attribute("user") != null) {
+                //FIND SHOWS BY USER TOP ARTISTS-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
                 List<String> artists = spotifyDao.getTopArtist();
                 List<Event> eventList = ticketMasterDao.getNextPortlandShow(artists);
 
@@ -72,6 +75,37 @@ public class App {
 //            model.put("topArtistLink", spotifyDao.getTopArtist());
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
+
+        get("/playlist/new", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
+
+//            String inputCity = request.queryParams("inputCity");
+//            System.out.println("Input City: "+ inputCity);
+//            String inputDate = request.queryParams("inputDate");
+//            System.out.println("Input Date: "+ inputDate);
+            sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getId());
+
+            model.put("user", request.session().attribute("user"));
+            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));
+        });
+
+        post("/playlist/new", (request, response) -> {
+            Map<String, Object> model = new HashMap<>();
+            //BUILD SPOTIFY PLAYLIST BASED ON SUBMITTED CITY AND DATE
+//            String inputCity = request.queryParams("inputCity");
+//            System.out.println("Input City: "+ inputCity);
+//            String inputDate = request.queryParams("inputDate");
+
+//            sql2oMerge.eventsPlaylist("Portland", "2018-02-01");
+//                Playlist playlist = new Playlist();
+
+
+            model.put("user", request.session().attribute("user"));
+//            model.put("playlistId", get()));
+
+            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));
+        });
+
 
         get("/signin", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
