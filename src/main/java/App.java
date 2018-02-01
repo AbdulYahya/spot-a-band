@@ -72,25 +72,27 @@ public class App {
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs"));
         });
 
-        get("/playlist/new", (request, response) -> {
-            Map<String, Object> model = new HashMap<>();
-
-//            String inputCity = request.queryParams("inputCity");
-//            System.out.println("Input City: "+ inputCity);
-//            String inputDate = request.queryParams("inputDate");
-//            System.out.println("Input Date: "+ inputDate);
-            sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getDisplayName());
-
-            model.put("user", request.session().attribute("user"));
-            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));
-        });
+//        get("/playlist/new", (request, response) -> {
+//            Map<String, Object> model = new HashMap<>();
+//
+////            String inputCity = request.queryParams("inputCity");
+////            System.out.println("Input City: "+ inputCity);
+////            String inputDate = request.queryParams("inputDate");
+////            System.out.println("Input Date: "+ inputDate);
+////            sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getDisplayName());
+//
+//            model.put("user", request.session().attribute("user"));
+//            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));
+//        });
 
         post("/playlist/new", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
+            System.out.println("on post route");
             //BUILD SPOTIFY PLAYLIST BASED ON SUBMITTED CITY AND DATE
-//            String inputCity = request.queryParams("inputCity");
-//            System.out.println("Input City: "+ inputCity);
-//            String inputDate = request.queryParams("inputDate");
+            String inputCity = request.queryParams("inputCity");
+            System.out.println("Input City: "+ inputCity);
+            String inputDate = request.queryParams("inputDate");
+            System.out.println("Input Date: "+ inputDate);
 
 //            sql2oMerge.eventsPlaylist("Portland", "2018-02-01");
 //                Playlist playlist = new Playlist();

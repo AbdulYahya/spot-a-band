@@ -1,5 +1,6 @@
 package dao;
 
+import com.wrapper.spotify.Api;
 import com.wrapper.spotify.methods.*;
 import com.wrapper.spotify.models.*;
 import com.wrapper.spotify.models.Artist;
@@ -34,11 +35,13 @@ public class Sql2oMerge implements Merge{
 //        System.out.println(user.getId());
 //        System.out.println(playlistID);
         // spotifyDao.getSpotifyApi
+//        final PlaylistCreationRequest request = spotifyDao.getSpotifyApi().createPlaylist(userID, "Test 2")
         final PlaylistCreationRequest request = spotifyDao.apiConstructor().createPlaylist(userID, "Test 2")
                 .publicAccess(true)
                 .build();
 
-//        System.out.println(request.);
+        System.out.println("creation request: " + request);
+        System.out.println(spotifyDao.oAuth(spotifyDao.getCode()));
 //        try {
 //            Playlist playlist = request.get();
 //            playlistID = playlist.getId();
@@ -50,7 +53,7 @@ public class Sql2oMerge implements Merge{
         List<Event> events = ticketMasterDao.getShowsForCityOnDay(city, date);
 
         try {
-            final Playlist playlist = request.get();
+            final Playlist playlist = request.get(); //token is likely missing here.
 
             System.out.println("You just created this playlist!");
             System.out.println("Its title is " + playlist.getName());
