@@ -5,6 +5,7 @@
 #separate {
     border-bottom: solid white 20px;
     border-left: solid white 15px;
+    background-color: #191414!important;
 }
 
 #push {
@@ -16,11 +17,32 @@
     padding-top: 8px;
     padding-bottom: 8px;
     margin-top: 30px;
+    background-color: #1DB954!important;
+    color: black!important;
 }
 .container {
   max-width: 960px;
 }
 
+#profileImageDiv {
+    height: 200px;
+    width: 200px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.outer {
+    position: relative;
+}
+.overlay {
+    width: 200px;
+    height: 200px;
+    display: inline-flex;
+    position: absolute;
+    min-width: 100%;
+    background: rgba(30, 215, 96, 0.6);
+}
 /*
 *      Spotify Login Button
 */
@@ -32,6 +54,20 @@
   padding: 1rem 2rem;
   font-size: 1.45rem;
   border-radius: 2rem;
+}
+
+.card{
+    max-width:  500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card-show {
+    border-color: black!important;
+}
+
+h2 {
+    color: #1DB954!important;
 }
 
 /*
@@ -142,3 +178,5 @@
 }
 
 .overflow-hidden { overflow: hidden; }
+
+

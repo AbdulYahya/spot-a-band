@@ -2,13 +2,31 @@
 {{/partial}}
 
 {{#partial "main"}}
-  <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-    <div class="col-md-8 p-lg-5 mx-auto my-5">
-      <!--<h1 class="display-4 font-weight-normal">Good App Name</h1>-->
-      <h1 class="display-4 font-weight-normal">Hi, {{ user }}!</h1>
-      <p class="lead font-weight-normal">Say something here about the app...</p>
-    </div>
-  </div>
+  <!--<div id="profileImageDiv" class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light" style="background-image: url("{{ profileImage }}");">-->
+          <!--{{#if profileImage}}-->
+  <!--<div id="profileImageDiv" style="background-image: url("{{ profileImage }}");">-->
+          <!--{{ else }}-->
+  <!--<div id="profileImageDiv" style="background-image: url('/assets/images/test-pic.jpg');">-->
+          <!--{{/if}}-->
+  <!--<div class="position-relative overflow-hidden m-md-3">-->
+      <!--<div id="profileImageDiv">-->
+          <!--<div class="overlay">-->
+              <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light h-50">
+                  <div class="col-md-8 p-lg-3 mx-auto my-3">
+                      <!--<h1 class="display-4 font-weight-normal">Good App Name</h1>-->
+                      <!--<div class="outer">-->
+                          <!--<img id="spotifyProfileImage" class="rounded-circle img-fluid overlay">-->
+                          <!--<div class="overlay"></div>-->
+                      <!--</div>-->
+                      <h1 class="display-4 font-weight-normal">Hi, {{ user }}!</h1>
+                      <p class="lead font-weight-normal">Say something here about the app...</p>
+                  </div>
+              </div>
+          <!--</div>-->
+      <!--</div>-->
+  <!--</div>-->
+
+
 
   <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden" id="separate">
       <div class="my-3 py-3">
@@ -31,12 +49,11 @@
   <!--Top artist section-->
   <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden" id="separate">
       <div class="my-3 py-3">
-          <h2 class="display-5">Section for finding a show based on Spotify user's top artists. </h2>
-          <p class="lead">subheading.</p>
-          <button>Show me the next show!</button>
+          <h2 class="display-5">Upcoming shows for your Top Artists: </h2>
+          <p class="lead">in Portland, OR</p>
           <div class="row">
-            <div class="col-4"></div>
-            <div class="col-4">
+            <!--<div class="col-4"></div>-->
+            <div class="col-12">
               {{#if eventList}}
                 <div class="card"><!-- Style 1 START -->
                   <!--<h4 class="card-title text-secondary">Test</h4>-->
@@ -45,7 +62,7 @@
                       {{#each eventList}}
                         <li class="list-group-item">
                           {{ name }}
-                          <div class="card">
+                          <div class="card card-show">
                             <div class="card-body text-secondary">
                               <ul id="compare" class="list-group list-group-flush">
                                   <li class="list-group-item"><img src="{{image}}" width="80%"></li>
@@ -91,7 +108,7 @@
                 <!--{{/each}}-->
               <!--{{/if}}-->
             </div>
-            <div class="col-4"></div>
+            <!--<div class="col-4"></div>-->
           </div>
 
 
@@ -124,6 +141,14 @@
 {{/partial}}
 
 {{#partial "custom-scripts"}}
+    <script async>
+        'use strict';
+
+        var profileImageURL = "{{ profileImage }}".replace(" ", "/").replace(/&#x3D;/g, "=").replace(/&amp;/g, "&");
+        var userAvi = document.getElementById("spotifyProfileImage");
+
+        userAvi.setAttribute("src", profileImageURL);
+    </script>
 {{/partial}}
 
 {{> layout.hbs}}

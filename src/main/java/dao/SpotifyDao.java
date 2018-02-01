@@ -19,11 +19,12 @@ public interface SpotifyDao {
     User setCurrentUser(CurrentUserRequest currentUserRequest);
     User getCurrentUser();
 
+    Api getSpotifyApi();
     String getCode();
     String getAccessToken();
 
     void setAccessToken(String accessToken);
-
+    void setSpotifyApi(Api spotifyApi);
 //    Artist getArtistFromSpotify();
 
     //READ
