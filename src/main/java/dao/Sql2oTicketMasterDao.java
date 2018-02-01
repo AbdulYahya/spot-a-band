@@ -82,6 +82,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
             //assembled url:
             String apiRequest = (route + classificationName + artist + dmaId + apiKey).replaceAll(" ", "+");
+            System.out.println(apiRequest);
             //sent request to ticketmaster api
             try {
                 URL url = new URL(apiRequest);
@@ -99,8 +100,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                     JsonObject apiResponse = json.getAsJsonObject()
                             .getAsJsonObject("_embedded")
                             .getAsJsonArray("events")
-                            .get(0)
-                            .getAsJsonObject();
+                            .get(0).getAsJsonObject();
                     //date and time are objects inside the events array and require reaching down further into Json data
                     JsonObject date = json.getAsJsonObject()
                             .getAsJsonObject("_embedded")
@@ -122,6 +122,13 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                             .getAsJsonObject("_embedded")
                             .getAsJsonArray("venues")
                             .get(0).getAsJsonObject();
+                    JsonObject jsonImages = json.getAsJsonObject()
+                            .getAsJsonObject("_embedded")
+                            .getAsJsonArray("events")
+                            .get(0).getAsJsonObject()
+                            .getAsJsonArray("images")
+                            .get(0).getAsJsonObject();
+
 
                     //see if there is price range data and assign it if it exists
                     String price= new String();
@@ -145,11 +152,12 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                     String localDate = date.get("localDate").getAsString();
                     String localTime = time.toString();
                     String venue = jsonvenue.get("name").getAsString();
-                    Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime, venue, venueUrl);
+                    String image = jsonImages.get("url").getAsString();
+                    Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime, price, venue, venueUrl, image);
                     nextPortlandShow.add(event);
                     event.setPriceRange(price);
                 } else {
-                    Event event = new Event(artistName, "none", "", "no upcoming shows", "", "", "");
+                    Event event = new Event(artistName, "none", "", "no upcoming shows", "", "", "", "", "");
                     nextPortlandShow.add(event);
                 }
             } catch (IOException e) {
@@ -215,6 +223,12 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                         .getAsJsonObject("_embedded")
                         .getAsJsonArray("venues")
                         .get(0).getAsJsonObject();
+                JsonObject jsonImages = json.getAsJsonObject()
+                        .getAsJsonObject("_embedded")
+                        .getAsJsonArray("events")
+                        .get(0).getAsJsonObject()
+                        .getAsJsonArray("images")
+                        .get(0).getAsJsonObject();
 
                 //see if there is price range data and assign it if it exists
                 String price= new String();
@@ -238,7 +252,8 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
                 String localDate = date.get("localDate").getAsString();
                 String localTime = time.toString();
                 String venue = jsonvenue.get("name").getAsString();
-                Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime, venue, venueUrl);
+                String image = jsonImages.get("url").getAsString();
+                Event event = new Event(name, ticketMasterId, ticketMasterUrl, localDate, localTime, price, venue, venueUrl, image);
                 event.setPriceRange(price);
                 tonightsShows.add(event);
             }
@@ -310,7 +325,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
             //loop through events array and add each event to list
             for (int i = 0; i < eventsArray.size(); i++) {
-                Event event = new Event("", "", "", "", "", "", "");
+                Event event = new Event("", "", "", "", "", "", "", "", "");
                 JsonObject apiResponse = json.getAsJsonObject()
                         .getAsJsonObject("_embedded")
                         .getAsJsonArray("events")
@@ -346,7 +361,7 @@ public class Sql2oTicketMasterDao implements TicketMasterDao {
 
     @Override
     public void addEvent(Event event) {
-        String sql = "INSERT INTO events (name, ticketMasterId, url, localDate, localTime, priceRange, venue, venueUrl) VALUES (:name, :ticketMasterId, :url, :localDate, :localTime, :priceRange, :venue, :venueUrl)";
+        String sql = "INSERT INTO events (name, ticketMasterId, url, localDate, localTime, priceRange, venue, venueUrl, image) VALUES (:name, :ticketMasterId, :url, :localDate, :localTime, :priceRange, :venue, :venueUrl, :image)";
         try (Connection con = sql2o.open()){
             int id = (int) con.createQuery(sql)
                     .bind(event)

@@ -112,8 +112,8 @@ public class App {
             String username = spotifyDao.formatUserId(user.getId()).toString();
             //System.out.println(user.getImages());
 
-            model.put("user", username);
-            request.session().attribute("user", username);
+            model.put("user", user.getDisplayName());
+            request.session().attribute("user", user.getDisplayName());
 
             response.redirect("/");
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));

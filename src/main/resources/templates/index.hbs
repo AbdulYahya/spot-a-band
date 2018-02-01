@@ -30,10 +30,11 @@
                           <div class="card">
                             <div class="card-body text-secondary">
                               <ul id="compare" class="list-group list-group-flush">
+                                  <li class="list-group-item"><img src="{{image}}" width="80%"></li>
                                   <li class="list-group-item">{{ localDate }}</li>
                                   <li class="list-group-item">{{ venue }}</li>
                                   <li class="list-group-item">{{ priceRange }}</li>
-                                  <li class="list-group-item">{{ url }}</li>
+                                  <li class="list-group-item"><a href="{{ url }}">buy tickets</a></li>
 
                                 <!--{{#if  localDate "no upcoming shows" }}-->
                                     <!--Sorry!-->

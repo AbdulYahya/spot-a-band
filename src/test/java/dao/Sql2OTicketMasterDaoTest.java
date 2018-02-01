@@ -19,11 +19,11 @@ public class Sql2OTicketMasterDaoTest {
     private Sql2oTicketMasterDao ticketMasterDao;
 
     public Event setupEvent() {
-        return new Event("name","ticketMasterId", "url", "localDate","localTime", "venue", "venueUrl");
+        return new Event("name","ticketMasterId", "url", "localDate","localTime", "priceRange", "venue", "venueUrl", "image");
     }
 
     public Event setupEvent2() {
-        return new Event("name2","ticketMasterId2", "url2", "localDate2","localTime", "venue2", "venueUrl2");
+        return new Event("name2","ticketMasterId2", "url2", "localDate2","localTime", "priceRange2", "venue2", "venueUrl2", "image2");
     }
 
 
