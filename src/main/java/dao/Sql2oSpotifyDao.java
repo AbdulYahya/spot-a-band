@@ -143,8 +143,9 @@ public class Sql2oSpotifyDao implements SpotifyDao {
 
     @Override
     public void setCode(String code) {
-
+        this.code = code;
     }
+
     @Override
     public Artist findById(int id) {
         String sql = "SELECT * FROM artists WHERE id = :id";

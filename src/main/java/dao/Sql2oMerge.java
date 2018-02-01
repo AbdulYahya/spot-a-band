@@ -1,5 +1,6 @@
 package dao;
 
+import com.wrapper.spotify.Api;
 import com.wrapper.spotify.methods.*;
 import com.wrapper.spotify.models.*;
 import com.wrapper.spotify.models.Artist;
@@ -30,7 +31,6 @@ public class Sql2oMerge implements Merge{
 
     @Override
     public void eventsPlaylist(String city, String date, String userID){
-        //create a playlist of name "playing in [CITY] on [DATE]"
         String playlistID = "";
 //        System.out.println(user.getId());
 //        System.out.println(playlistID);
@@ -47,19 +47,16 @@ public class Sql2oMerge implements Merge{
             System.out.println("no playlist was made");
             System.out.println(spotifyDao.oAuth(spotifyDao.getAccessToken()));
         }
-//        final PlaylistRequest request = spotifyDao.getSpotifyApi().getPlaylist(userID, "3ktAYNcRHpazJ9qecm3ptn").build();
-//
+
         List<Event> events = ticketMasterDao.getShowsForCityOnDay(city, date);
 
         try {
-            final Playlist playlist = request.get();
+            final Playlist playlist = request.get(); //token is likely missing here.
 
             System.out.println("You just created this playlist!");
             System.out.println("Its title is " + playlist.getName());
         } catch (Exception e) {
-//            System.out.println("Something went wrong!" + e.getMessage());
             System.out.println("no playlist was made");
-            System.out.println(spotifyDao.oAuth(spotifyDao.getAccessToken()));
         }
         List<String> artistList = new ArrayList<>();
         for (Event event:events) {
@@ -79,7 +76,6 @@ public class Sql2oMerge implements Merge{
             }
         }
         for(String artist:artistList){
-//            int i = 0;
             try{
                 List<Track> topTracks = TopTracksRequest.builder().id(artist).countryCode("US").build().get();
                 List<String> topTrackIDs = new ArrayList<>();
