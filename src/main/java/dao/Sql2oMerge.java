@@ -5,9 +5,11 @@ import com.wrapper.spotify.models.*;
 import com.wrapper.spotify.models.Artist;
 import com.wrapper.spotify.models.User;
 import models.*;
+import org.apache.commons.lang.RandomStringUtils;
 import org.sql2o.Sql2o;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -32,17 +34,21 @@ public class Sql2oMerge implements Merge{
         String playlistID = "";
 //        System.out.println(user.getId());
 //        System.out.println(playlistID);
-        final PlaylistCreationRequest request = spotifyDao.apiConstructor().createPlaylist(userID,"playing in" + city +" on " + date)
+//        spotifyDao.
+//        final List<String> scopes = Arrays.asList("user-top-read, user-read-private, user-read-email, playlist-modify-public");
+//        System.out.println(spotifyDao.apiConstructor().createAuthorizeURL(scopes, RandomStringUtils.random(64, true, true)));
+        PlaylistCreationRequest request = spotifyDao.getSpotifyApi().createPlaylist(userID,"test2")
                 .publicAccess(true)
                 .build();
-//        try {
-//            Playlist playlist = request.get();
-//            playlistID = playlist.getId();
-//        } catch (Exception e) {
-//            System.out.println("no playlist was made");
-//            System.out.println(spotifyDao.oAuth(spotifyDao.getAccessToken()));
-//        }
-
+        try {
+            Playlist playlist = request.get();
+            playlistID = playlist.getId();
+        } catch (Exception e) {
+            System.out.println("no playlist was made");
+            System.out.println(spotifyDao.oAuth(spotifyDao.getAccessToken()));
+        }
+//        final PlaylistRequest request = spotifyDao.getSpotifyApi().getPlaylist(userID, "3ktAYNcRHpazJ9qecm3ptn").build();
+//
         List<Event> events = ticketMasterDao.getShowsForCityOnDay(city, date);
 
         try {
@@ -58,7 +64,7 @@ public class Sql2oMerge implements Merge{
         List<String> artistList = new ArrayList<>();
         for (Event event:events) {
             String artist = event.getName();
-            ArtistSearchRequest artistSearchRequest = spotifyDao.apiConstructor().searchArtists(artist).market("US").limit(1).build();
+            ArtistSearchRequest artistSearchRequest = spotifyDao.getSpotifyApi().searchArtists(artist).market("US").limit(1).build();
 
             try {
                 final Page<com.wrapper.spotify.models.Artist> artistSearchResult = artistSearchRequest.get();
@@ -80,7 +86,7 @@ public class Sql2oMerge implements Merge{
                 for(Track track: topTracks){
                     topTrackIDs.add(track.getId());
                 }
-                final AddTrackToPlaylistRequest playlistAdd = spotifyDao.apiConstructor().addTracksToPlaylist(userID, playlistID, topTrackIDs).build();
+                final AddTrackToPlaylistRequest playlistAdd = spotifyDao.getSpotifyApi().addTracksToPlaylist(userID, playlistID, topTrackIDs).build();
 
             }catch (Exception e) {
             }

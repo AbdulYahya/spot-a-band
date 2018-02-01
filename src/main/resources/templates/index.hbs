@@ -38,7 +38,7 @@
               <label id="push">Select Day: </label>
               <input type="date" id="inputDate" name="inputDate">
               <br>
-              <a class="btn btn-lg btn-success btn-spotify d-inline-flex" id="playlist-button" href="/playlist/new" type="submit">Create Playlist</a>
+              <a class="btn btn-lg btn-success btn-spotify d-inline-flex" id="playlist-button">Create Playlist</a>
           </form>
           {{#block "embed"}}
 
@@ -148,6 +148,13 @@
         var userAvi = document.getElementById("spotifyProfileImage");
 
         userAvi.setAttribute("src", profileImageURL);
+
+        var url = "{{ authorizeURL }}".replace(/&#x3D;/g, "=").replace(/&amp;/g, "&");
+        var newPlaylist = document.getElementById("playlist-button");
+
+        newPlaylist.addEventListener("click", function () {
+         window.location.replace(url)
+        });
     </script>
 {{/partial}}
 

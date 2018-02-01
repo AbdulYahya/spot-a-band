@@ -2,6 +2,7 @@
 
 import com.google.gson.*;
 import com.wrapper.spotify.methods.CurrentUserRequest;
+import com.wrapper.spotify.methods.PlaylistCreationRequest;
 import com.wrapper.spotify.methods.PlaylistRequest;
 import com.wrapper.spotify.models.Playlist;
 import com.wrapper.spotify.models.Image;
@@ -33,7 +34,6 @@ public class App {
         Sql2o sql2o = new Sql2o(connectionString, "", "");
         Sql2oSpotifyDao sql2oSpotifyDao = new Sql2oSpotifyDao(sql2o);
         conn = sql2o.open();
-
         Sql2oTicketMasterDao ticketMasterDao = new Sql2oTicketMasterDao(sql2o);
         Sql2oSpotifyDao spotifyDao = new Sql2oSpotifyDao(sql2o);
         Sql2oMerge sql2oMerge = new Sql2oMerge(sql2o);
@@ -44,6 +44,7 @@ public class App {
         // Root - Index
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
+            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
             // Authenticate user by checking if session attribute 'user' holds any data
             if (request.session().attribute("user") != null) {
                 //FIND SHOWS BY USER TOP ARTISTS-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -58,6 +59,8 @@ public class App {
                         System.out.println("The artist " + event.getName() + " has a show");
                     }
                 }
+
+
 
                 model.put("user", request.session().attribute("user"));
                 model.put("profileImage", request.session().attribute("profileImage"));
@@ -74,19 +77,25 @@ public class App {
 
         get("/playlist/new", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
-
+            if (request.session().attribute("user") != null) {
+                sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getId());
+            }
+            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
+//            final PlaylistCreationRequest request =
+//            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
 //            String inputCity = request.queryParams("inputCity");
 //            System.out.println("Input City: "+ inputCity);
 //            String inputDate = request.queryParams("inputDate");
 //            System.out.println("Input Date: "+ inputDate);
-            sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getId());
 
+            model.put("authorizeURL", authorizeURL);
             model.put("user", request.session().attribute("user"));
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));
         });
 
         post("/playlist/new", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
+
             //BUILD SPOTIFY PLAYLIST BASED ON SUBMITTED CITY AND DATE
 //            String inputCity = request.queryParams("inputCity");
 //            System.out.println("Input City: "+ inputCity);
@@ -94,7 +103,6 @@ public class App {
 
 //            sql2oMerge.eventsPlaylist("Portland", "2018-02-01");
 //                Playlist playlist = new Playlist();
-
 
             model.put("user", request.session().attribute("user"));
 //            model.put("playlistId", get()));
@@ -139,7 +147,18 @@ public class App {
                 model.put("user", spotifyDao.formatUserEmail(user.getEmail()));
                 request.session().attribute("user", spotifyDao.formatUserEmail(user.getEmail()));
             }
+//            final PlaylistCreationRequest creationRequest = spotifyDao.getSpotifyApi().createPlaylist(user.getId(), "test 2").publicAccess(true).build();
+//             sql2oMerge.eventsPlaylist("Portland", "2018-02-01", user.getDisplayName());
+//            try {
+//                final Playlist playlist = creationRequest.get();
+//                System.out.println(playlist.getName());
+//                System.out.println(playlist.getHref());
+//                System.out.println(playlist.getOwner());
+//            } catch (Exception e) {
+//
+//            }
 
+//            authdCode = spotifyDao.getCode();
             response.redirect("/");
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });

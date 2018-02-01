@@ -14,5 +14,7 @@ public interface Merge {
         event.getName();
     }*/
 
+//    void createPlaylist(String city, String date, String userId);
+
     List<Event> whenInTown();
 }
