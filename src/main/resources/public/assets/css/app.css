@@ -10,8 +10,7 @@
 *      Spotify Login Button
 */
 .btn-spotify {
-    /*background-color: cmyk(80, 0, 80, 0);*/
-  /*background-color: #1DB954;*/
+  color: rgb(255, 255, 255)!important;
   background-color: rgb(82, 190, 111);
   padding: 1rem 2rem;
   font-size: 1.45rem;
