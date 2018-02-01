@@ -21,6 +21,19 @@
   max-width: 960px;
 }
 
+#profileImageDiv {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.overlay {
+    background: rgba(30, 215, 96, 0.6);
+    background-image: url("/assets/images/spotify/logos/Spotify_Logo_Black_Uncoated.svg");
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+}
 /*
 *      Spotify Login Button
 */

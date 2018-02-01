@@ -2,6 +2,7 @@
 
 import com.google.gson.*;
 import com.wrapper.spotify.methods.CurrentUserRequest;
+import com.wrapper.spotify.models.Image;
 import dao.Sql2oMerge;
 import dao.Sql2oSpotifyDao;
 import dao.Sql2oTicketMasterDao;
@@ -63,14 +64,8 @@ public class App {
                 response.redirect("/signin"); // User auth failed - send user back to signin page
 
             }
-//            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
-            //System.out.println(artistsInTown);
-//            model.put("authorizeURL", authorizeURL);
-//            model.put("user", request.session().attribute("user"));
-//            model.put("email", request.session().attribute("email"));
 
-//            model.put("topArtistLink", spotifyDao.getTopArtist());
-            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
+            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs"));
         });
 
         get("/signin", (request, response) -> {
@@ -90,8 +85,14 @@ public class App {
             CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
             com.wrapper.spotify.models.User user = spotifyDao.setCurrentUser(currentUserRequest);
 
-            String username = spotifyDao.formatUserId(user.getId()).toString();
-            //System.out.println(user.getImages());
+            // If user has a profile image
+            if (user.getImages() != null) {
+                List<Image> images = user.getImages();
+
+                for (Image image : images) {
+                    model.put("profileImage", image);
+                }
+            }
 
 
             if (user.getDisplayName() != null) {
