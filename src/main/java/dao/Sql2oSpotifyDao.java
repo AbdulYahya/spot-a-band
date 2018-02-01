@@ -30,6 +30,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     private User currentUser;
     private String code;
     private String accessToken;
+    private StringBuilder formattedUserId = new StringBuilder();
 
     public Sql2oSpotifyDao(Sql2o sql2o) {
         this.sql2o = sql2o;
@@ -152,16 +153,27 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             JsonParser jsonParser = new JsonParser();
             JsonElement jsonElement = jsonParser.parse(new InputStreamReader((InputStream) request.getContent()));
             JsonArray itemsArray = jsonElement.getAsJsonObject().getAsJsonArray("items");
-            for (int i = 0; i< itemsArray.size() ;i++){
-                String artistName = jsonElement.getAsJsonObject()
+
+            for (JsonElement item : itemsArray) {
+                String artistsNames = jsonElement.getAsJsonObject()
                         .getAsJsonArray("items")
-                        .get(i).getAsJsonObject().get("name").getAsString();
-                artists.add(artistName);
+                        .get(0).getAsJsonObject()
+                        .get("name")
+                        .getAsString();
+                artists.add(artistsNames);
             }
+
+            // Adding Test Artists
+            artists.add("J. Cole");
+            artists.add("Wale");
+            artists.add("Nipsey Hussle");
+            artists.add("Faye Carol");
+
+            System.out.println("Location: spotifyDao getTopArtist");
             for (String artist: artists){
                 System.out.println(artist);
             }
-//            return response.get("name").toString();
+
             return artists;
         } catch (IOException e) {
             e.printStackTrace();
@@ -170,6 +182,18 @@ public class Sql2oSpotifyDao implements SpotifyDao {
         return null;
     }
 
+    @Override
+    public StringBuilder formatUserId(String userId) {
+        String[] userIdArray = userId.split("\\.");
+
+        for (String name : userIdArray) {
+            formattedUserId
+                    .append(Character.toUpperCase(name.charAt(0)))
+                    .append(name.substring(1))
+                    .append(" ");
+        }
+        return formattedUserId;
+    }
 
     @Override
     public Properties loadProperties() {

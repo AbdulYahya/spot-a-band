@@ -1,10 +1,10 @@
 {{#partial "main"}}
     <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-        <div class="col-md-5 p-lg-5 mx-auto my-5">
-            <img class="img-fluid" src="public/assets/images/spotify/logos/Spotify_Logo_Green_Coated.svg" alt="Spotify Logo">
-            <h1 class="display-4 font-weight-normal">Good App Name</h1>
-            <p class="lead font-weight-normal">Say something here about the app...</p>
-            <a class="btn btn-lg btn-spotify" href="{{ authorizeURL }}">Log in to Spotify</a>
+        <div class="col-md-5 p-lg-3 mx-auto my-2">
+          <img class="img-fluid mb-3" src="/assets/images/spotify/icons/Spotify_Icon_Green_Coated.svg" alt="Spotify Logo">
+          <h1 class="display-4 font-weight-normal">Sign In</h1>
+          <p class="lead font-weight-normal">Use your Spotify account to sign in!</p>
+          <a id="spotifyOAuth" class="btn btn-lg btn-success btn-spotify d-inline-flex" >Spotify oAuth</a>
         </div>
     </div>
 
@@ -36,6 +36,36 @@
       <!--</div>-->
     <!--</div>-->
   <!--</div>-->
+{{/partial}}
+
+{{#partial "custom-scripts"}}
+  <script defer>
+    'use strict';
+
+  /*
+  *   Dynamic link 'authorizeURL' contains & (encoded value: &#x3D;) and = (encoded value: &amp;)
+  *   to decode those symbols we use Regex to replace them back to their normal decoded values
+  * */
+
+    var url = "{{ authorizeURL }}".replace(/&#x3D;/g, "=").replace(/&amp;/g, "&");
+    var oAuthBtn = document.getElementById("spotifyOAuth");
+
+    /*
+    *   Bug Fix:
+    *       Usernames are constructed using a StringBuilder method,
+    *       so if the use rapidly clicks our 'Spotify oAuth' button
+    *       it will append multiple instances of the user's name
+    * */
+    oAuthBtn.addEventListener("click", function () {
+      oAuthBtn.classList.add("disabled"); // Disable button after first click
+      oAuthBtn.innerHTML = "Verifying details.. &ensp; <div class=\"loader align-self-center\"></div>"; // Replace default text
+      setTimeout(function(){ // Wait 500 milliseconds to allow time for loader animation
+         window.location.replace(url)
+      }, 500);
+    });
+
+
+  </script>
 {{/partial}}
 
 {{> layout.hbs}}
