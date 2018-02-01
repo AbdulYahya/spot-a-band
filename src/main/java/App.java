@@ -83,7 +83,7 @@ public class App {
 //            System.out.println("Input City: "+ inputCity);
 //            String inputDate = request.queryParams("inputDate");
 //            System.out.println("Input Date: "+ inputDate);
-            sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getId());
+            sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getDisplayName());
 
             model.put("user", request.session().attribute("user"));
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));

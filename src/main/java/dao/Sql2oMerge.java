@@ -28,13 +28,17 @@ public class Sql2oMerge implements Merge{
 
     @Override
     public void eventsPlaylist(String city, String date, String userID){
+        System.out.println(userID + " " + city + " " + date);
         //create a playlist of name "playing in [CITY] on [DATE]"
         String playlistID = "";
 //        System.out.println(user.getId());
 //        System.out.println(playlistID);
-        final PlaylistCreationRequest request = spotifyDao.apiConstructor().createPlaylist(userID,"playing in" + city +" on " + date)
+        // spotifyDao.getSpotifyApi
+        final PlaylistCreationRequest request = spotifyDao.apiConstructor().createPlaylist(userID, "Test 2")
                 .publicAccess(true)
                 .build();
+
+//        System.out.println(request.);
 //        try {
 //            Playlist playlist = request.get();
 //            playlistID = playlist.getId();
@@ -53,7 +57,7 @@ public class Sql2oMerge implements Merge{
         } catch (Exception e) {
 //            System.out.println("Something went wrong!" + e.getMessage());
             System.out.println("no playlist was made");
-            System.out.println(spotifyDao.oAuth(spotifyDao.getAccessToken()));
+           // System.out.println(spotifyDao.);
         }
         List<String> artistList = new ArrayList<>();
         for (Event event:events) {
