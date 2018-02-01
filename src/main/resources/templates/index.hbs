@@ -7,11 +7,26 @@
       <!--<h1 class="display-4 font-weight-normal">Good App Name</h1>-->
       <h1 class="display-4 font-weight-normal">Hi, {{ user }}!</h1>
       <p class="lead font-weight-normal">Say something here about the app...</p>
-      <a class="btn btn-outline-secondary" href="{{ authorizeURL }}">Log in to Spotify</a>
     </div>
   </div>
 
-  <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
+  <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden" id="separate">
+      <div class="my-3 py-3">
+          <h2 class="display-5">Section for generating a playlist. </h2>
+          <form>
+              <label>Enter City: </label>
+              <input type="text" placeholder="Portland">
+              <br>
+              <label id="push">Select Day: </label>
+              <input type="date">
+              <br>
+              <a class="btn btn-lg btn-success btn-spotify d-inline-flex" id="playlist-button">Create Playlist</a>
+          </form>
+      </div>
+  </div>
+
+  <!--Top artist section-->
+  <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden" id="separate">
       <div class="my-3 py-3">
           <h2 class="display-5">Upcoming shows for your Top Artists: </h2>
           <p class="lead">in Portland, OR</p>
@@ -38,10 +53,10 @@
                                 <!--{{#if  localDate "no upcoming shows" }}-->
                                     <!--Sorry!-->
                                 <!--{{ else }}-->
-                                  <!--<li class="list-group-item">{{ localDate }}</li>-->
-                                  <!--<li class="list-group-item">{{ venue }}</li>-->
-                                  <!--<li class="list-group-item">{{ priceRange }}</li>-->
-                                  <!--<li class="list-group-item">{{ url }}</li>-->
+                                  <li class="list-group-item">{{ localDate }}</li>
+                                  <li class="list-group-item">{{ venue }}</li>
+                                  <li class="list-group-item">{{ priceRange }}</li>
+                                  <li class="list-group-item">{{ url }}</li>
                                 <!--{{/if}}-->
 
                                 <!--<li class="list-group-item">{{ name }}</li>-->
