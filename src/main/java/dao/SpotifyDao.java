@@ -25,6 +25,7 @@ public interface SpotifyDao {
 
     void setAccessToken(String accessToken);
     void setSpotifyApi(Api spotifyApi);
+    void setCode(String code);
 //    Artist getArtistFromSpotify();
 
     //READ
