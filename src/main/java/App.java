@@ -94,7 +94,6 @@ public class App {
                 }
             }
 
-
             if (user.getDisplayName() != null) {
                 model.put("user", user.getDisplayName());
                 request.session().attribute("user", user.getDisplayName());
