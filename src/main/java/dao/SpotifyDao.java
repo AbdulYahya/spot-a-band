@@ -31,6 +31,8 @@ public interface SpotifyDao {
 
     List<String> getTopArtist();
 
+    StringBuilder formatUserId(String userId);
+
     Properties loadProperties();
 
 }

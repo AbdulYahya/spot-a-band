@@ -1,7 +1,11 @@
+{{#partial "registerHelpers"}}
+{{/partial}}
+
 {{#partial "main"}}
   <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-    <div class="col-md-5 p-lg-5 mx-auto my-5">
-      <h1 class="display-4 font-weight-normal">Good App Name</h1>
+    <div class="col-md-8 p-lg-5 mx-auto my-5">
+      <!--<h1 class="display-4 font-weight-normal">Good App Name</h1>-->
+      <h1 class="display-4 font-weight-normal">Hi, {{ user }}!</h1>
       <p class="lead font-weight-normal">Say something here about the app...</p>
       <a class="btn btn-outline-secondary" href="{{ authorizeURL }}">Log in to Spotify</a>
     </div>
@@ -12,21 +16,81 @@
           <h2 class="display-5">Section for finding a show based on Spotify user's top artists. </h2>
           <p class="lead">subheading.</p>
           <button>Show me the next show!</button>
-          {{#if eventList}}
+          <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+              {{#if eventList}}
+                <div class="card"><!-- Style 1 START -->
+                  <!--<h4 class="card-title text-secondary">Test</h4>-->
+                  <div class="card-body text-secondary">
+                    <ul class="list-group list-group-flush">
+                      {{#each eventList}}
+                        <li class="list-group-item">
+                          {{ name }}
+                          <div class="card">
+                            <div class="card-body text-secondary">
+                              <ul id="compare" class="list-group list-group-flush">
+                                  <li class="list-group-item">{{ localDate }}</li>
+                                  <li class="list-group-item">{{ venue }}</li>
+                                  <li class="list-group-item">{{ priceRange }}</li>
+                                  <li class="list-group-item">{{ url }}</li>
 
-              <ul>
-                  {{#each eventList}}
+                                <!--{{#if  localDate "no upcoming shows" }}-->
+                                    <!--Sorry!-->
+                                <!--{{ else }}-->
+                                  <!--<li class="list-group-item">{{ localDate }}</li>-->
+                                  <!--<li class="list-group-item">{{ venue }}</li>-->
+                                  <!--<li class="list-group-item">{{ priceRange }}</li>-->
+                                  <!--<li class="list-group-item">{{ url }}</li>-->
+                                <!--{{/if}}-->
 
-                      <li>{{name}}</li>
-                      <ul>
-                          <li>{{localDate}} at {{localTime}}</li>
-                          <li>{{venue}}: {{venueUrl}}</li>
-                          <li>{{priceRange}}</li>
-                          <li>buy tickets: {{url}}</li>
-                      </ul>
-                  {{/each}}
-              </ul>
-          {{/if}}
+                                <!--<li class="list-group-item">{{ name }}</li>-->
+                              </ul>
+                            </div>
+                          </div>
+                        </li>
+                      {{/each}}
+                    </ul>
+                  </div>
+                </div><!-- Style 1 END-->
+              {{/if}}
+
+
+              <!--{{#if eventList}}-->
+                <!--{{#each eventList}}-->
+                  <!--<div class="card">-->
+                    <!--<div class="card-title text-secondary">{{ name }}</div>-->
+                    <!--<div class="card-body text-secondary">-->
+                      <!--<ul class="list-group list-group-flush">-->
+                        <!--<li class="list-group-item">{{ localDate }} at {{ localTime }}</li>-->
+                        <!--<li class="list-group-item">{{ venue }}</li>-->
+                        <!--<li class="list-group-item">{{ priceRange }}</li>-->
+                        <!--<li class="list-group-item">{{ url }}</li>-->
+                      <!--</ul>-->
+                    <!--</div>-->
+                  <!--</div>-->
+                <!--{{/each}}-->
+              <!--{{/if}}-->
+            </div>
+            <div class="col-4"></div>
+          </div>
+
+
+          <!--{{#if eventList}}-->
+            <!---->
+              <!--<ul>-->
+                  <!--{{#each eventList}}-->
+
+                      <!--<li>{{name}}</li>-->
+                      <!--<ul>-->
+                          <!--<li>{{localDate}} at {{localTime}}</li>-->
+                          <!--<li>{{venue}}: {{venueUrl}}</li>-->
+                          <!--<li>{{priceRange}}</li>-->
+                          <!--<li>buy tickets: {{url}}</li>-->
+                      <!--</ul>-->
+                  <!--{{/each}}-->
+              <!--</ul>-->
+          <!--{{/if}}-->
       </div>
   </div>
 
@@ -38,6 +102,9 @@
 {{/block}}
 
 
+{{/partial}}
+
+{{#partial "custom-scripts"}}
 {{/partial}}
 
 {{> layout.hbs}}

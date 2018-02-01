@@ -3,14 +3,17 @@ package models;
 import java.util.List;
 
 public class User {
-
     int id;
     private String spotifyClientId;
     private String spotifyClientSecret;
     private String spotifyUserId;
     private String spotifyToken;
+    private StringBuilder fullUserName;
     private List<String> spotifyScopes;
 
+    public User() {
+
+    }
     public String getSpotifyClientId(){
         return this.spotifyClientId;
     }
