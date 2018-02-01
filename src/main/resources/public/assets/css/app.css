@@ -2,6 +2,21 @@
     font-family: "Helvetica Neue";
 }
 
+#separate {
+    border-bottom: solid white 20px;
+    border-left: solid white 15px;
+}
+
+#push {
+    margin-top: 10px;
+}
+#playlist-button {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-top: 30px;
+}
 .container {
   max-width: 960px;
 }
@@ -11,7 +26,7 @@
 */
 .btn-spotify {
     /*background-color: cmyk(80, 0, 80, 0);*/
-  /*background-color: #1DB954;*/
+  color: #FFFFFF!important;
   background-color: rgb(82, 190, 111);
   padding: 1rem 2rem;
   font-size: 1.45rem;
