@@ -57,6 +57,7 @@ public class App {
                 }
 
                 model.put("user", request.session().attribute("user"));
+                model.put("profileImage", request.session().attribute("profileImage"));
                 model.put("eventList", eventList);
 
                 return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
@@ -90,7 +91,10 @@ public class App {
                 List<Image> images = user.getImages();
 
                 for (Image image : images) {
-                    model.put("profileImage", image);
+                    System.out.println(image.getUrl());
+
+                    model.put("profileImage", image.getUrl());
+                    request.session().attribute("profileImage", image.getUrl());
                 }
             }
 
