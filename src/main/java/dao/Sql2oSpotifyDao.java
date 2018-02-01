@@ -30,6 +30,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     private User currentUser;
     private String code;
     private String accessToken;
+    private Api spotifyApi;
 
     public Sql2oSpotifyDao(Sql2o sql2o) {
         this.sql2o = sql2o;
@@ -61,9 +62,11 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     @Override
     public Api oAuth(String code) {
         this.code = code;
-        Api spotifyApi = apiConstructor();
+        Api api = apiConstructor();
 
-        final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = spotifyApi.authorizationCodeGrant(code).build().getAsync();
+        setSpotifyApi(apiConstructor());
+
+        final SettableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = api.authorizationCodeGrant(code).build().getAsync();
 
             /* Add callbacks to handle success and failure */
         Futures.addCallback(authorizationCodeCredentialsFuture, new FutureCallback<AuthorizationCodeCredentials>() {
@@ -71,8 +74,8 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             public void onSuccess(AuthorizationCodeCredentials authorizationCodeCredentials) {
 
                 /* Set the access token and refresh token so that they are used whenever needed */
-                spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
-                spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+                api.setAccessToken(authorizationCodeCredentials.getAccessToken());
+                api.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
 
                 setAccessToken(authorizationCodeCredentials.getAccessToken());
             }
@@ -85,7 +88,9 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             }
         });
 
-        return spotifyApi;
+        setSpotifyApi(api);
+
+        return api;
     }
 
     @Override
@@ -112,6 +117,11 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     }
 
     @Override
+    public Api getSpotifyApi() {
+        return this.spotifyApi;
+    }
+
+    @Override
     public String getCode() {
         return code;
     }
@@ -124,6 +134,11 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     @Override
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    @Override
+    public void setSpotifyApi(Api spotifyApi) {
+        this.spotifyApi = spotifyApi;
     }
 
     @Override
