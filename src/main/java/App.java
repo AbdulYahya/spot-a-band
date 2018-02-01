@@ -55,12 +55,15 @@ public class App {
         // Root - Index
         get("/", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
-            String test = request.session().attribute("user");
-            System.out.println(test);
             if (request.session().attribute("user") != null) {
-                List<Event> events = sql2oMerge.whenInTown();
+                List<String> artists = spotifyDao.getTopArtist();
+                List<Event> eventList = ticketMasterDao.getNextPortlandShow(artists);
 
-                model.put("events", events);
+                //                List<Event> eventList =
+
+//                System.out.println(eventList);
+
+                model.put("eventList", eventList);
                 return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
             } else {
                 response.redirect("/signin");
@@ -106,6 +109,7 @@ public class App {
 //            System.out.println(spotifyDao.getCurrentUser());
             request.session().attribute("user", user.getEmail());
             model.put("user", user.getEmail());
+            response.redirect("/");
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
         });
 

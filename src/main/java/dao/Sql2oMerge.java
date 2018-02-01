@@ -24,7 +24,7 @@ public class Sql2oMerge implements Merge{
 
 //    CurrentUserRequest currentUserRequest = spotifyDao.oAuth(spotifyDao.getCode()).getMe().build();
 //    User user = spotifyDao.getCurrentUser(currentUserRequest);
-    User user;// = spotifyDao.getCurrentUser();
+    User user = spotifyDao.getCurrentUser();
 
     @Override
     public void eventsPlaylist(String city, String date){
