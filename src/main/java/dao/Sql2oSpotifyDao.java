@@ -30,7 +30,6 @@ public class Sql2oSpotifyDao implements SpotifyDao {
     private User currentUser;
     private String code;
     private String accessToken;
-    private StringBuilder formattedUserId = new StringBuilder();
 
     public Sql2oSpotifyDao(Sql2o sql2o) {
         this.sql2o = sql2o;
@@ -184,15 +183,38 @@ public class Sql2oSpotifyDao implements SpotifyDao {
 
     @Override
     public StringBuilder formatUserId(String userId) {
+        StringBuilder formattedUserId = new StringBuilder();
         String[] userIdArray = userId.split("\\.");
 
         for (String name : userIdArray) {
-            formattedUserId
+             formattedUserId
                     .append(Character.toUpperCase(name.charAt(0)))
                     .append(name.substring(1))
                     .append(" ");
         }
         return formattedUserId;
+    }
+
+    @Override
+    public StringBuilder formatUserEmail(String userEmail) {
+        StringBuilder buildUserEmail = new StringBuilder();
+        String formattedUserEmail = userEmail.substring(0, userEmail.indexOf("@"));
+
+        if (formattedUserEmail.contains(".")) {
+            String[] splitUserEmail = formattedUserEmail.split("\\.");
+
+            for (String name : splitUserEmail) {
+                buildUserEmail
+                        .append(Character.toUpperCase(name.charAt(0)))
+                        .append(name.substring(1))
+                        .append(" ");
+            }
+        } else {
+            buildUserEmail
+                    .append(formattedUserEmail);
+        }
+
+        return buildUserEmail;
     }
 
     @Override
