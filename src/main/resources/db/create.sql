@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS events (
     localTime VARCHAR,
     priceRange VARCHAR,
     venue VARCHAR,
-    venueUrl VARCHAR
+    venueUrl VARCHAR,
+    image VARCHAR
 );
 
 CREATE TABLE IF NOT EXISTS artists (

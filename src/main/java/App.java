@@ -1,35 +1,18 @@
 
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
+
 import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
-import com.wrapper.spotify.Api;
 import com.wrapper.spotify.methods.CurrentUserRequest;
-import com.wrapper.spotify.models.AuthorizationCodeCredentials;
-import com.wrapper.spotify.models.Image;
 import dao.Sql2oMerge;
 import dao.Sql2oSpotifyDao;
 import dao.Sql2oTicketMasterDao;
 import exceptions.ApiException;
 import models.Event;
-import models.User;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import spark.ModelAndView;
 import spark.template.handlebars.HandlebarsTemplateEngine;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import javax.jws.Oneway;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -40,12 +23,12 @@ import static spark.Spark.*;
 public class App {
     public static void main(String[] args) {
         staticFileLocation("/public");
-        Sql2oSpotifyDao sql2oSpotifyDao;
+//        Sql2oSpotifyDao sql2oSpotifyDao;
         Connection conn;
         Gson gson = new Gson();
         String connectionString = "jdbc:h2:~/spot-a-band.db;INIT=RUNSCRIPT from 'classpath:db/create.sql'";
         Sql2o sql2o = new Sql2o(connectionString, "", "");
-        sql2oSpotifyDao = new Sql2oSpotifyDao(sql2o);
+        Sql2oSpotifyDao sql2oSpotifyDao = new Sql2oSpotifyDao(sql2o);
         conn = sql2o.open();
 
         Sql2oTicketMasterDao ticketMasterDao = new Sql2oTicketMasterDao(sql2o);
@@ -104,16 +87,20 @@ public class App {
             Map<String, Object> model = new HashMap<>();
             final String code = request.queryParams("code");
 
-            //response.redirect("/");
-
             CurrentUserRequest currentUserRequest = spotifyDao.oAuth(code).getMe().build();
             com.wrapper.spotify.models.User user = spotifyDao.setCurrentUser(currentUserRequest);
 
             String username = spotifyDao.formatUserId(user.getId()).toString();
             //System.out.println(user.getImages());
 
-            model.put("user", user.getDisplayName());
-            request.session().attribute("user", user.getDisplayName());
+
+            if (user.getDisplayName() != null) {
+                model.put("user", user.getDisplayName());
+                request.session().attribute("user", user.getDisplayName());
+            } else {
+                model.put("user", spotifyDao.formatUserEmail(user.getEmail()));
+                request.session().attribute("user", spotifyDao.formatUserEmail(user.getEmail()));
+            }
 
             response.redirect("/");
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
