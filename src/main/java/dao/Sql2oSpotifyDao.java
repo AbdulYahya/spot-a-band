@@ -168,6 +168,7 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             artists.add("Rod Stewart");
             artists.add("Faye Carol");
 
+
             System.out.println("Location: spotifyDao getTopArtist");
             for (String artist: artists){
                 System.out.println(artist);

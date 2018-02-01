@@ -93,6 +93,7 @@ public class App {
             String username = spotifyDao.formatUserId(user.getId()).toString();
             //System.out.println(user.getImages());
 
+
             if (user.getDisplayName() != null) {
                 model.put("user", user.getDisplayName());
                 request.session().attribute("user", user.getDisplayName());
@@ -100,7 +101,6 @@ public class App {
                 model.put("user", spotifyDao.formatUserEmail(user.getEmail()));
                 request.session().attribute("user", spotifyDao.formatUserEmail(user.getEmail()));
             }
-
 
             response.redirect("/");
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "index.hbs"));
