@@ -22,10 +22,13 @@ public interface SpotifyDao {
     Api getSpotifyApi();
     String getCode();
     String getAccessToken();
-
     void setAccessToken(String accessToken);
     void setSpotifyApi(Api spotifyApi);
     void setCode(String code);
+
+    //make a playlist and return the playlistId for use in adding songs
+    String createPlaylist(String name, String description);
+
 //    Artist getArtistFromSpotify();
 
     //READ

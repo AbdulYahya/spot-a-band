@@ -9,6 +9,7 @@ import com.wrapper.spotify.methods.*;
 import com.wrapper.spotify.models.*;
 import com.google.gson.*;
 import models.Artist;
+import org.eclipse.jetty.client.HttpConnection;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
@@ -161,18 +162,14 @@ public class Sql2oSpotifyDao implements SpotifyDao {
         String route = "https://api.spotify.com/v1/me/top/artists";
         String accessToken = getAccessToken();
         List<String> artists = new ArrayList<>();
-
         try {
             URL url = new URL(route);
             HttpURLConnection request = (HttpURLConnection) url.openConnection();
-
             request.setRequestMethod("GET");
             request.setRequestProperty("Authorization", "Bearer " + accessToken);
-
             JsonParser jsonParser = new JsonParser();
             JsonElement jsonElement = jsonParser.parse(new InputStreamReader((InputStream) request.getContent()));
             JsonArray itemsArray = jsonElement.getAsJsonObject().getAsJsonArray("items");
-
             for (JsonElement item : itemsArray) {
                 String artistsNames = jsonElement.getAsJsonObject()
                         .getAsJsonArray("items")
@@ -181,24 +178,65 @@ public class Sql2oSpotifyDao implements SpotifyDao {
                         .getAsString();
                 artists.add(artistsNames);
             }
-
             // Adding Test Artists
             artists.add("Katy Perry");
             artists.add("Eagles");
             artists.add("Rod Stewart");
             artists.add("Faye Carol");
-
-
-            System.out.println("Location: spotifyDao getTopArtist");
             for (String artist: artists){
                 System.out.println(artist);
             }
-
             return artists;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
+    }
 
+    @Override
+    public String createPlaylist(String name, String description) {
+        String userIdroute = "https://api.spotify.com/v1/me";
+        String accessToken = getAccessToken();
+        String userId = new String();
+        try {
+            URL url = new URL(userIdroute);
+            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            request.setRequestMethod("GET");
+            request.setRequestProperty("Authorization", "Bearer " + accessToken);
+            JsonParser jsonParser = new JsonParser();
+            JsonElement json = jsonParser.parse(new InputStreamReader((InputStream) request.getContent()));
+            userId = json.getAsJsonObject().get("id").getAsString();
+            System.out.println("user id =" + userId);
+
+        } catch ( IOException e){
+            e.printStackTrace();
+            System.out.println("failed to get userId");
+        }
+
+        String route = "https://api.spotify.com/v1/users/" + userId + "/playlists";
+        String playlistId = new String();
+        try {
+            URL url = new URL(route);
+            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+            request.setRequestMethod("POST");
+            request.setRequestProperty("Authorization", "Bearer " + accessToken);
+            request.setRequestProperty("Content-Type", "application/json");
+            request.setRequestProperty("name", name);
+            request.setRequestProperty("public", "true");
+            request.setRequestProperty("description", description
+            );
+            JsonParser jsonParser = new JsonParser();
+            JsonElement jsonElement = jsonParser.parse(new InputStreamReader((InputStream) request.getContent()));
+            playlistId = jsonElement
+                    .getAsJsonObject()
+                    .get("id")
+                    .getAsString();
+            System.out.println(playlistId);
+            return playlistId;
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("no playlist, dude");
+        }
         return null;
     }
 
