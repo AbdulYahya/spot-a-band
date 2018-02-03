@@ -40,8 +40,10 @@
               <br>
               <button class="btn btn-lg btn-success btn-spotify d-inline-flex" id="playlist-button" type="submit">Create Playlist</button>
           </form>
+          {{#if playlistId}}
           {{#block "embed"}}
           {{/block}}
+          {{/if}}
       </div>
   </div>
 
