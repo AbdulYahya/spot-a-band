@@ -89,6 +89,44 @@ public class Sql2oMerge implements Merge{
         }
     }
 
+
+    @Override
+    public List<String> getSongsToAdd(String city, String date) {
+        List<String> spotifySongIds = new ArrayList<>();
+        List<Event> events = ticketMasterDao.getShowsForCityOnDay(city, date);
+        List<String> artistIds = new ArrayList<>();
+        for (Event event:events) {
+            System.out.println(event.getName());
+            final ArtistSearchRequest request = spotifyDao.getSpotifyApi().searchArtists(event.getName()).market("US").limit(10).build();
+
+            try {
+                final Page<Artist> artistSearchResult = request.get();
+                final List<Artist> artists = artistSearchResult.getItems();
+
+                System.out.println("I've found " + artistSearchResult.getTotal() + " artists!");
+                System.out.println(artists.get(0).getName());
+                artistIds.add(artists.get(0).getId());
+                System.out.println(artists.get(0).getId());
+
+            } catch (Exception e) {
+                System.out.println("Something went wrong!" + e.getMessage());
+            }
+            for(String id : artistIds){
+                try{
+                    List<Track> topTracks = TopTracksRequest.builder().id(id).countryCode("US").build().get();
+                    for(Track track: topTracks){
+                        spotifySongIds.add(track.getId());
+                    }
+                }catch (Exception e) {
+                    System.out.println("no tracks");
+                }
+            }
+        }
+        return spotifySongIds;
+    }
+
+
+
     @Override
     public List<Event> whenInTown(){
         List<String> artists = spotifyDao.getTopArtist();

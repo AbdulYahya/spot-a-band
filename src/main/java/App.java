@@ -76,24 +76,6 @@ public class App {
         });
 
 
-//        get("/playlist/new", (request, response) -> {
-//            Map<String, Object> model = new HashMap<>();
-//            if (request.session().attribute("user") != null) {
-//                sql2oMerge.eventsPlaylist("Portland", "2018-02-01", spotifyDao.getCurrentUser().getId());
-//            }
-//            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
-////            final PlaylistCreationRequest request =
-////            String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
-////            String inputCity = request.queryParams("inputCity");
-////            System.out.println("Input City: "+ inputCity);
-////            String inputDate = request.queryParams("inputDate");
-////            System.out.println("Input Date: "+ inputDate);
-//
-//            model.put("authorizeURL", authorizeURL);
-//            model.put("user", request.session().attribute("user"));
-//            return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));
-//        });
-
         post("/playlist/new", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
             String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
@@ -103,16 +85,67 @@ public class App {
             System.out.println("Input City: "+ inputCity);
             String inputDate = request.queryParams("inputDate");
             System.out.println("Input Date: "+ inputDate);
+            String playlistId = new String();
 
+            // BUILD LIST OF SONG IDS
+            List<String> tracksToAdd = new ArrayList<>();
+            List<Event> events = ticketMasterDao.getShowsForCityOnDay(inputCity, inputDate);
+            for (Event event : events) {
+                System.out.println(event.getName());
+                List<String> artistIds = new ArrayList<>();
+                final ArtistSearchRequest artistSearchRequest = spotifyDao.getSpotifyApi().searchArtists(event.getName()).market("US").limit(10).build();
+                try {
+                    final Page<Artist> artistSearchResult = artistSearchRequest.get();
+                    final List<Artist> artists = artistSearchResult.getItems();
+
+                    System.out.println("I've found " + artistSearchResult.getTotal() + " artists!");
+                    System.out.println(artists.get(0).getName());
+                    artistIds.add(artists.get(0).getId());
+                    System.out.println(artists.get(0).getId());
+                } catch (Exception e) {
+                    System.out.println("No artist found ::" + e);
+                }
+                for(String id : artistIds){
+                    final TopTracksRequest topTracksRequest = spotifyDao.getSpotifyApi().getTopTracksForArtist(id, "US").build();
+                    try{
+                        final List<Track> topTracks = topTracksRequest.get();
+                        for(Track track: topTracks){
+                            tracksToAdd.add("spotify:track:"+track.getId());
+                            System.out.printf(track.getName());
+                            System.out.printf(track.getId());
+                        }
+                    }catch (Exception e) {
+                        System.out.println("no tracks");
+                    }
+                }
+            }
+
+
+            //CREATE A PLAAYLIST FOR INPUTCITY ON INPUTDATE
             final PlaylistCreationRequest creationRequest = spotifyDao.getSpotifyApi().createPlaylist(request.session().attribute("id"), "Bands playing in " + inputCity + " on " + inputDate).publicAccess(true).build();
             try {
                 final Playlist playlist = creationRequest.get();
                 System.out.println(playlist.getName());
-                System.out.println(playlist.getId());
-                System.out.println(playlist.getOwner());
+                playlistId = playlist.getId();
             } catch (Exception e) {
                 System.out.println("playlist generation failed");
             }
+            System.out.println(playlistId);
+
+
+            //ADD TRACKS TO PLAYLIST
+            final int insertIndex = 0;   // Index starts at 0
+            final AddTrackToPlaylistRequest addTrackToPlaylistRequest = spotifyDao.getSpotifyApi().addTracksToPlaylist(request.session().attribute("id"), playlistId, tracksToAdd)
+                    .position(insertIndex)
+                    .build();
+            try {
+                System.out.println(Arrays.asList(tracksToAdd));
+                addTrackToPlaylistRequest.get();
+                System.out.println(addTrackToPlaylistRequest.get().toString());
+            } catch (Exception e) {
+                System.out.println("add tracks failed" + e.getMessage());
+            }
+
 
             model.put("authorizeURL", authorizeURL);
             model.put("user", request.session().attribute("user"));
@@ -120,10 +153,10 @@ public class App {
         });
 
 
+
         get("/signin", (request, response) -> {
             Map<String, Object> model = new HashMap<>();
             String authorizeURL = spotifyDao.apiConstructor().createAuthorizeURL(scopes, state);
-
             model.put("authorizeURL", authorizeURL);
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "signin.hbs"));
         });

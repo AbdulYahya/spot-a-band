@@ -170,10 +170,10 @@ public class Sql2oSpotifyDao implements SpotifyDao {
             JsonParser jsonParser = new JsonParser();
             JsonElement jsonElement = jsonParser.parse(new InputStreamReader((InputStream) request.getContent()));
             JsonArray itemsArray = jsonElement.getAsJsonObject().getAsJsonArray("items");
-            for (JsonElement item : itemsArray) {
+            for (int i = 0; i < itemsArray.size(); i ++) {
                 String artistsNames = jsonElement.getAsJsonObject()
                         .getAsJsonArray("items")
-                        .get(0).getAsJsonObject()
+                        .get(i).getAsJsonObject()
                         .get("name")
                         .getAsString();
                 artists.add(artistsNames);
