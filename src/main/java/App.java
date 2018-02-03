@@ -150,6 +150,8 @@ public class App {
             model.put("playlistId", playlistId);
             model.put("eventList", request.session().attribute("eventList"));
             model.put("id", request.session().attribute("id"));
+            model.put("city", inputCity);
+            model.put("date", inputDate);
             return new HandlebarsTemplateEngine().render(new ModelAndView(model, "embed.hbs"));
         });
 
